@@ -567,31 +567,34 @@
 //  HAPPYFAMILY - SINGLE SCRIPT, REAL-TIME FIREBASE SYNC
 // ========================================================
 
-// +----------------------------------------------------------+
-// |  FIREBASE CONFIG - PASTE YOUR VALUES HERE               |
-// |                                                          |
-// |  Steps:                                                  |
-// |  1. https://console.firebase.google.com                 |
-// |  2. Create project > HappyFamily                        |
-// |  3. Build > Realtime Database > Create (test mode)      |
-// |  4. Project Settings > Your apps > Add Web app </>      |
-// |  5. Copy values from the firebaseConfig shown there     |
-// +----------------------------------------------------------+
-const FIREBASE = {
-  apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
-  authDomain: "happyfamily-e4f68.firebaseapp.com",
-  projectId: "happyfamily-e4f68",
-  storageBucket: "happyfamily-e4f68.firebasestorage.app",
-  messagingSenderId: "740546226739",
-  appId: "1:740546226739:web:8247b42ed7b059fe5a9146",
-  const FIREBASE_DB_URL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
-};
+// ==============================================================
+// STEP 1: Paste each value from Firebase Project Settings below
+// ==============================================================
+const FIREBASE_API_KEY        = "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk";
+const FIREBASE_AUTH_DOMAIN    = "happyfamily-e4f68.firebaseapp.com";
+const FIREBASE_PROJECT_ID     = "happyfamily-e4f68";
+const FIREBASE_STORAGE_BUCKET = "happyfamily-e4f68.firebasestorage.app";
+const FIREBASE_MESSAGING_ID   = "740546226739";
+const FIREBASE_APP_ID         = "1:740546226739:web:8247b42ed7b059fe5a9146";
+const FIREBASE_DB_URL         = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-// PASTE YOUR REALTIME DATABASE URL BELOW
-// Find it: Firebase Console > Realtime Database > Data tab (URL shown at the top)
-// Your project URL: https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
-const FIREBASE_DB_URL = "PASTE_YOUR_DATABASE_URL_HERE";
-// ----------------------------------------------------------
+// ==============================================================
+// STEP 2: Paste your Realtime Database URL below
+// Find it: Firebase Console > Realtime Database > Data tab
+// Your project URL is:
+// https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
+// ==============================================================
+const FIREBASE_DB_URL = "PASTE_databaseURL_HERE";
+
+// (Do not edit below this line)
+const FIREBASE = {
+  apiKey           : FIREBASE_API_KEY,
+  authDomain       : FIREBASE_AUTH_DOMAIN,
+  projectId        : FIREBASE_PROJECT_ID,
+  storageBucket    : FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_ID,
+  appId            : FIREBASE_APP_ID
+};
 
 // -- SINGLE SOURCE OF TRUTH --
 const appData = { tasks: {}, history: {} };
