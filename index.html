@@ -2,14 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#FF6B6B">
+
+<!-- Android PWA -->
 <meta name="mobile-web-app-capable" content="yes">
+
+<!-- iOS PWA - required for Add to Home Screen -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="HappyFamily">
-<link rel="manifest" href="manifest.json">
+
+<!-- iOS icons - multiple sizes required -->
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
+
+<!-- Manifest -->
+<link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>HappyFamily</title>
@@ -367,6 +379,20 @@
   .chart-bar-fill { height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
   .chart-bar-fill span { font-size: 11px; font-weight: 800; color: white; }
 
+  /* Edit button */
+  .btn-edit {
+    padding: 10px 14px;
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .btn-edit:hover { border-color: var(--coral); color: var(--coral); background: #fff5f5; }
+
+  /* Edit modal header accent */
+  .modal-title.edit { color: var(--coral); }
+
   /* Toast */
   .toast {
     position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
@@ -383,6 +409,45 @@
     .tab-bar { max-width: 600px; left: 50%; transform: translateX(-50%); }
     .fab { right: calc(50% - 280px); }
   }
+
+  /* iOS Install Banner */
+  .ios-install-banner {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 1px solid #e0d8d0;
+    border-radius: 20px 20px 0 0;
+    padding: 16px 20px 32px;
+    z-index: 300;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+    animation: slideUp 0.3s ease;
+  }
+  .ios-install-banner.show { display: block; }
+  .ios-banner-header {
+    display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 14px;
+  }
+  .ios-banner-title {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ios-banner-title img {
+    width: 44px; height: 44px; border-radius: 10px;
+  }
+  .ios-banner-title strong { font-size: 15px; display: block; }
+  .ios-banner-title span { font-size: 12px; color: var(--muted); }
+  .ios-banner-close {
+    background: #f0ebe4; border: none; border-radius: 50%;
+    width: 28px; height: 28px; font-size: 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .ios-steps { display: flex; flex-direction: column; gap: 10px; }
+  .ios-step {
+    display: flex; align-items: center; gap: 12px;
+    background: #faf7f4; border-radius: 12px; padding: 10px 14px;
+  }
+  .ios-step-icon { font-size: 22px; flex-shrink: 0; }
+  .ios-step-text { font-size: 13px; font-weight: 600; color: var(--text); }
+  .ios-step-text span { color: var(--coral); font-weight: 800; }
 </style>
 </head>
 <body>
@@ -516,6 +581,72 @@
   <div class="section-title">Insights 💡</div>
   <div id="insights-container">
     <div class="empty-state"><div class="empty-icon">🔮</div><p>No insights yet</p><span>Complete some tasks to see insights!</span></div>
+  </div>
+</div>
+
+<!-- EDIT TASK MODAL -->
+<div class="modal-overlay" id="edit-modal-overlay" onclick="closeEditModalOutside(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title edit">✏️ Edit Task List</span>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="assign-toggle-row">
+        <span>Assign all to:</span>
+        <button class="person-chip dinesh" id="edit-global-dinesh" onclick="setEditGlobalAssign('Dinesh')">👨 Dinesh</button>
+        <button class="person-chip sushmi" id="edit-global-sushmi" onclick="setEditGlobalAssign('Sushmi')">👩 Sushmi</button>
+        <button class="person-chip" id="edit-global-none" onclick="setEditGlobalAssign('')" style="background:var(--bg)">Individual</button>
+      </div>
+      <div class="items-table-wrap">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width:36px">#</th>
+              <th>Item Name</th>
+              <th style="width:70px">Qty</th>
+              <th style="width:90px">Unit</th>
+              <th style="width:110px">Assign To</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="edit-items-tbody"></tbody>
+        </table>
+      </div>
+      <button class="btn-add-row" onclick="addEditItemRow()">+ Add Item</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="submitEditTask()" style="background:linear-gradient(135deg,var(--teal),var(--teal-dark))">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- iOS INSTALL BANNER -->
+<div class="ios-install-banner" id="ios-install-banner">
+  <div class="ios-banner-header">
+    <div class="ios-banner-title">
+      <img src="icon-192.png" alt="HappyFamily">
+      <div>
+        <strong>Install HappyFamily</strong>
+        <span>Add to your Home Screen</span>
+      </div>
+    </div>
+    <button class="ios-banner-close" onclick="dismissIOSBanner()">x</button>
+  </div>
+  <div class="ios-steps">
+    <div class="ios-step">
+      <div class="ios-step-icon">1</div>
+      <div class="ios-step-text">Tap the <span>Share</span> button at the bottom of Safari</div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-icon">2</div>
+      <div class="ios-step-text">Scroll down and tap <span>Add to Home Screen</span></div>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-icon">3</div>
+      <div class="ios-step-text">Tap <span>Add</span> in the top right corner</div>
+    </div>
   </div>
 </div>
 
@@ -954,6 +1085,7 @@ function renderAssign() {
         </div>`).join('')}
       </div>
       <div class="task-card-actions">
+        <button class="btn-edit" onclick="openEditModal('${task.id}')">✏️ Edit</button>
         <input type="text" class="comment-input"
           placeholder="💬 Optional comment..." id="comment-${task.id}">
         <button class="btn-complete" onclick="completeTask('${task.id}')">✓ Done</button>
@@ -1106,11 +1238,158 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// -- EDIT TASK --
+let editingTaskId  = null;
+let editRowCount   = 0;
+let editGlobalAssign = '';
+
+function openEditModal(taskId) {
+  const task = appData.tasks[taskId];
+  if (!task) return;
+  editingTaskId    = taskId;
+  editRowCount     = 0;
+  editGlobalAssign = '';
+
+  // Clear tbody and populate with existing items
+  const tbody = document.getElementById('edit-items-tbody');
+  tbody.innerHTML = '';
+  task.items.forEach(item => addEditItemRow(item));
+
+  updateEditGlobalChips();
+  document.getElementById('edit-modal-overlay').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal-overlay').classList.remove('open');
+  editingTaskId = null;
+}
+
+function closeEditModalOutside(e) {
+  if (e.target === document.getElementById('edit-modal-overlay')) closeEditModal();
+}
+
+function setEditGlobalAssign(val) {
+  editGlobalAssign = val;
+  updateEditGlobalChips();
+  document.querySelectorAll('#edit-items-tbody .assign-select').forEach(sel => {
+    if (val) sel.value = val;
+  });
+}
+
+function updateEditGlobalChips() {
+  document.getElementById('edit-global-dinesh').classList.toggle('active', editGlobalAssign === 'Dinesh');
+  document.getElementById('edit-global-sushmi').classList.toggle('active', editGlobalAssign === 'Sushmi');
+  document.getElementById('edit-global-none').classList.toggle('active',   editGlobalAssign === '');
+}
+
+function addEditItemRow(prefill) {
+  editRowCount++;
+  const tbody = document.getElementById('edit-items-tbody');
+  const tr    = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="sno-cell">${editRowCount}</td>
+    <td><input type="text"   placeholder="e.g. Milk" class="item-name-input" value="${prefill ? esc(prefill.name) : ''}"></td>
+    <td><input type="number" placeholder="1" min="1"  class="item-qty-input" style="text-align:center" value="${prefill ? esc(prefill.qty) : ''}"></td>
+    <td>
+      <select class="item-unit-input">
+        <option>Pieces</option><option>Qty</option><option>Kg</option>
+        <option>Litre</option><option>Pack</option><option>Dozen</option>
+      </select>
+    </td>
+    <td>
+      <select class="assign-select">
+        <option value="Both">Both</option>
+        <option value="Dinesh">👨 Dinesh</option>
+        <option value="Sushmi">👩 Sushmi</option>
+      </select>
+    </td>
+    <td><button class="remove-row-btn" onclick="removeEditRow(this)">✕</button></td>
+  `;
+  // Set unit and assignTo from prefill
+  if (prefill) {
+    tr.querySelector('.item-unit-input').value = prefill.unit   || 'Pieces';
+    tr.querySelector('.assign-select').value   = prefill.assignTo || 'Both';
+  }
+  tbody.appendChild(tr);
+  if (!prefill) tr.querySelector('.item-name-input').focus();
+}
+
+function removeEditRow(btn) {
+  btn.closest('tr').remove();
+  document.querySelectorAll('#edit-items-tbody tr').forEach((row, i) => {
+    row.querySelector('.sno-cell').textContent = i + 1;
+  });
+  editRowCount = document.querySelectorAll('#edit-items-tbody tr').length;
+}
+
+function submitEditTask() {
+  if (!editingTaskId) return;
+  const rows  = document.querySelectorAll('#edit-items-tbody tr');
+  const items = [];
+  let valid   = true;
+
+  rows.forEach(row => {
+    const nameEl = row.querySelector('.item-name-input');
+    const name   = nameEl.value.trim();
+    if (!name) {
+      valid = false;
+      nameEl.style.borderColor = 'var(--coral)';
+      nameEl.addEventListener('input', () => nameEl.style.borderColor = '', { once: true });
+      return;
+    }
+    const qty      = row.querySelector('.item-qty-input').value  || '1';
+    const unit     = row.querySelector('.item-unit-input').value;
+    const assignTo = row.querySelector('.assign-select').value   || 'Both';
+    items.push({ name, qty, unit, assignTo });
+  });
+
+  if (!valid)             { showToast('Please fill all item names'); return; }
+  if (items.length === 0) { showToast('Add at least one item');      return; }
+
+  // Update the task in appData
+  const task    = appData.tasks[editingTaskId];
+  const allNames = items.map(i => i.name).join(', ');
+  task.items    = items;
+  task.title    = allNames.length > 42 ? allNames.substring(0, 42) + '...' : allNames;
+  task.updatedAt = new Date().toISOString();
+
+  saveLocal();
+  renderAll();
+  fbSaveTask(editingTaskId, task);  // sync to Firebase
+
+  closeEditModal();
+  showToast('✅ Task updated!');
+}
+
 // -- INIT --
 updateGreeting();
 loadLocal();
 renderAll();
 initFirebase(); // connects to Firebase if keys are configured above
+
+// -- iOS INSTALL BANNER --
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function isInStandaloneMode() {
+  return ('standalone' in navigator && navigator.standalone) ||
+    window.matchMedia('(display-mode: standalone)').matches;
+}
+function dismissIOSBanner() {
+  document.getElementById('ios-install-banner').classList.remove('show');
+  try { localStorage.setItem('hf_ios_dismissed', '1'); } catch(e) {}
+}
+// Show banner on iOS Safari only if not already installed and not dismissed
+if (isIOS() && !isInStandaloneMode()) {
+  const dismissed = localStorage.getItem('hf_ios_dismissed');
+  if (!dismissed) {
+    // Small delay so page loads first
+    setTimeout(() => {
+      document.getElementById('ios-install-banner').classList.add('show');
+    }, 1500);
+  }
+}
 
 if ('serviceWorker' in navigator) {
   // Listen for SW telling us caches are cleared — then reload to get fresh files
