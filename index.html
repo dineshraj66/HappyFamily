@@ -416,6 +416,15 @@
   </button>
 </div>
 
+<!-- SYNC STATUS BAR -->
+<div id="sync-bar" style="
+  display:none; text-align:center; padding:8px 16px;
+  color:white; font-family:'Nunito',sans-serif;
+  font-size:12px; font-weight:700; letter-spacing:0.3px;
+  position:sticky; top:52px; z-index:99;
+  transition: background 0.3s;
+"></div>
+
 <!-- HOME PAGE -->
 <div class="page active" id="page-home">
   <div class="greeting-card">
@@ -552,26 +561,23 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
-
 <script>
-// ════════════════════════════════════════════════
-//  HAPPYFAMILY — SINGLE UNIFIED SCRIPT
-// ════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+//  HAPPYFAMILY — SINGLE SCRIPT, REAL-TIME FIREBASE SYNC
+// ════════════════════════════════════════════════════════
 
-// ┌─────────────────────────────────────────────────────────────────┐
-// │  🔥 FIREBASE CONFIG — PASTE YOUR VALUES HERE                   │
-// │                                                                 │
-// │  How to get these values:                                       │
-// │  1. Go to https://console.firebase.google.com                  │
-// │  2. Create project → "HappyFamily"                             │
-// │  3. Build → Realtime Database → Create database (test mode)    │
-// │  4. Project Settings ⚙️ → Your apps → Add Web app (</>)        │
-// │  5. Copy each value from the firebaseConfig shown there        │
-// │                                                                 │
-// │  Leave as-is to use local storage only (single device)         │
-// └─────────────────────────────────────────────────────────────────┘
+// ┌──────────────────────────────────────────────────────────┐
+// │  🔥 FIREBASE CONFIG — PASTE YOUR VALUES HERE            │
+// │                                                          │
+// │  Steps:                                                  │
+// │  1. https://console.firebase.google.com                 │
+// │  2. Create project → HappyFamily                        │
+// │  3. Build → Realtime Database → Create (test mode)      │
+// │  4. Project Settings ⚙️ → Your apps → Add Web app </>   │
+// │  5. Copy values from the firebaseConfig shown there     │
+// └──────────────────────────────────────────────────────────┘
 const FIREBASE = {
-  apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
+ apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
   authDomain: "happyfamily-e4f68.firebaseapp.com",
   projectId: "happyfamily-e4f68",
   storageBucket: "happyfamily-e4f68.firebasestorage.app",
@@ -579,99 +585,128 @@ const FIREBASE = {
   appId: "1:740546226739:web:8247b42ed7b059fe5a9146",
   measurementId: "G-H33FZ6MZPW"
 };
-// ─────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────
 
-// ── DATA STORE (single source of truth) ──
+// ── SINGLE SOURCE OF TRUTH ──
 const appData = { tasks: {}, history: {} };
 
-// ── FIREBASE RUNTIME ──
-let fbDatabase = null;
-let fbConnected = false;
+// ── FIREBASE STATE ──
+let _db       = null;   // firebase database instance
+let _ref      = null;   // firebase ref function
+let _set      = null;   // firebase set function
+let _remove   = null;   // firebase remove function
+let fbReady   = false;  // true once listener is active
 
-function initFirebase() {
-  // Only activate if user has pasted real keys (not the PASTE_YOUR_... placeholders)
-  if (FIREBASE.apiKey.startsWith('PASTE_')) {
-    console.info('HappyFamily: Firebase not configured — using localStorage only.');
-    return;
-  }
-  try {
-    // Load Firebase SDK dynamically so it doesn't block the app if offline
-    const sdkBase = 'https://www.gstatic.com/firebasejs/10.7.1/';
-    Promise.all([
-      import(sdkBase + 'firebase-app.js'),
-      import(sdkBase + 'firebase-database.js')
-    ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onValue }]) => {
-      const fbApp  = initializeApp(FIREBASE);
-      fbDatabase   = getDatabase(fbApp);
-      fbConnected  = true;
-      console.info('HappyFamily: Firebase connected ✓');
-
-      // Live-sync: whenever Firebase data changes, update local appData & re-render
-      onValue(ref(fbDatabase, 'happyfamily'), (snap) => {
-        const d = snap.val() || {};
-        appData.tasks   = d.tasks   || {};
-        appData.history = d.history || {};
-        saveLocal(); // keep local copy in sync too
-        renderAll();
-      });
-
-      // Push existing local data up to Firebase on first connect
-      set(ref(fbDatabase, 'happyfamily'), {
-        tasks  : appData.tasks,
-        history: appData.history
-      });
-
-      // Store helpers for use in save/complete functions
-      window._fb = { ref, set, remove };
-    }).catch(err => {
-      console.warn('HappyFamily: Firebase failed to load —', err.message);
-    });
-  } catch(e) {
-    console.warn('HappyFamily: Firebase init error —', e.message);
-  }
+// ── SYNC STATUS UI ──
+function setSyncStatus(state) {
+  // state: 'connecting' | 'live' | 'local' | 'error'
+  const bar = document.getElementById('sync-bar');
+  if (!bar) return;
+  const cfg = {
+    connecting : { bg:'#667eea', text:'⏳ Connecting to Firebase…' },
+    live       : { bg:'#27ae60', text:'🟢 Live sync active — all devices in sync' },
+    local      : { bg:'#636e72', text:'💾 Offline mode — data saved locally' },
+    error      : { bg:'#e17055', text:'⚠️ Firebase error — using local storage' },
+  };
+  const c = cfg[state] || cfg.local;
+  bar.style.background = c.bg;
+  bar.textContent = c.text;
+  bar.style.display = 'block';
+  if (state === 'live') setTimeout(() => { bar.style.display = 'none'; }, 3000);
 }
 
-// ── LOCAL PERSISTENCE ──
+// ── FIREBASE INIT ──
+function initFirebase() {
+  if (FIREBASE.apiKey.startsWith('PASTE_')) {
+    setSyncStatus('local');
+    return;
+  }
+  setSyncStatus('connecting');
+  Promise.all([
+    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js'),
+    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js')
+  ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onValue }]) => {
+
+    _db     = getDatabase(initializeApp(FIREBASE));
+    _ref    = ref;
+    _set    = set;
+    _remove = remove;
+
+    // ── REAL-TIME LISTENER ──
+    // This fires immediately with current data, then again on EVERY change
+    // from ANY device — web or mobile. This is the only way data flows IN.
+    onValue(_ref(_db, 'happyfamily'), (snap) => {
+      const d = snap.val() || {};
+      appData.tasks   = d.tasks   || {};
+      appData.history = d.history || {};
+      saveLocal();
+      renderAll();
+      if (!fbReady) {
+        fbReady = true;
+        setSyncStatus('live');
+      }
+    }, (err) => {
+      console.error('Firebase read error:', err);
+      setSyncStatus('error');
+    });
+
+  }).catch(err => {
+    console.error('Firebase load error:', err);
+    setSyncStatus('error');
+  });
+}
+
+// ── FIREBASE WRITE HELPERS ──
+// Each writes ONLY its own record — never overwrites sibling data
+function fbSaveTask(id, obj) {
+  if (!fbReady) return;
+  _set(_ref(_db, 'happyfamily/tasks/' + id), obj).catch(e => console.error('fbSaveTask:', e));
+}
+function fbDeleteTask(id) {
+  if (!fbReady) return;
+  _remove(_ref(_db, 'happyfamily/tasks/' + id)).catch(e => console.error('fbDeleteTask:', e));
+}
+function fbSaveHistory(id, obj) {
+  if (!fbReady) return;
+  _set(_ref(_db, 'happyfamily/history/' + id), obj).catch(e => console.error('fbSaveHistory:', e));
+}
+
+// ── LOCAL STORAGE ──
 function saveLocal() {
   try { localStorage.setItem('hf_data', JSON.stringify(appData)); } catch(e) {}
 }
-
 function loadLocal() {
   try {
     const s = localStorage.getItem('hf_data');
-    if (s) {
-      const d = JSON.parse(s);
-      appData.tasks   = d.tasks   || {};
-      appData.history = d.history || {};
-    }
+    if (s) { const d = JSON.parse(s); appData.tasks = d.tasks||{}; appData.history = d.history||{}; }
   } catch(e) {}
 }
 
-// Push full state to Firebase (debounced helper)
 // ── TASK OPERATIONS ──
 function saveTask(taskObj) {
-  const id = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
+  const id   = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
   taskObj.id = id;
   appData.tasks[id] = taskObj;
-  saveLocal();            // save to local cache immediately
-  renderAll();            // update UI immediately (no waiting for Firebase)
-  fbWriteTask(id, taskObj); // push just this one record to Firebase
+  saveLocal();
+  renderAll();
+  fbSaveTask(id, taskObj);   // push to Firebase → triggers onValue on all other devices
 }
 
 function completeTask(taskId) {
-  const comment = (document.getElementById('comment-' + taskId) || {}).value || '';
-  const task = appData.tasks[taskId];
+  const el      = document.getElementById('comment-' + taskId);
+  const comment = el ? el.value.trim() : '';
+  const task    = appData.tasks[taskId];
   if (!task) return;
   task.completedAt = new Date().toISOString();
-  task.comment = comment.trim();
-  task.status   = 'done';
-  const histId  = 'hist_' + Date.now();
+  task.comment     = comment;
+  task.status      = 'done';
+  const histId     = 'hist_' + Date.now();
   appData.history[histId] = JSON.parse(JSON.stringify(task));
   delete appData.tasks[taskId];
-  saveLocal();                             // update local cache
-  renderAll();                             // update UI immediately
-  fbWriteHistory(histId, appData.history[histId]); // write history record
-  fbDeleteTask(taskId);                    // remove from tasks
+  saveLocal();
+  renderAll();
+  fbSaveHistory(histId, appData.history[histId]);  // write history record
+  fbDeleteTask(taskId);                            // remove task record
   showToast('🎉 Task completed!');
 }
 
