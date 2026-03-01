@@ -570,13 +570,12 @@
 // ==============================================================
 // STEP 1: Paste each value from Firebase Project Settings below
 // ==============================================================
-  const FIREBASE_API_KEY        = "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk";
-const FIREBASE_AUTH_DOMAIN    = "happyfamily-e4f68.firebaseapp.com";
-const FIREBASE_PROJECT_ID     = "happyfamily-e4f68";
-const FIREBASE_STORAGE_BUCKET = "happyfamily-e4f68.firebasestorage.app";
-const FIREBASE_MESSAGING_ID   = "740546226739";
-const FIREBASE_APP_ID         = "1:740546226739:web:8247b42ed7b059fe5a9146";
-const FIREBASE_DB_URL         = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
+const HF_KEY        = "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk";
+const HF_AUTH    = "happyfamily-e4f68.firebaseapp.com";
+const HF_PROJECT     = "happyfamily-e4f68";
+const HF_BUCKET = "happyfamily-e4f68.firebasestorage.app";
+const HF_MSGID   = "740546226739";
+const HF_APPID         = "1:740546226739:web:8247b42ed7b059fe5a9146";
 
 // ==============================================================
 // STEP 2: Paste your Realtime Database URL below
@@ -584,16 +583,16 @@ const FIREBASE_DB_URL         = "https://happyfamily-e4f68-default-rtdb.asia-sou
 // Your project URL is:
 // https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
 // ==============================================================
-const FIREBASE_DB_URL = "PASTE_databaseURL_HERE";
+const HF_DBURL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
 
 // (Do not edit below this line)
-const FIREBASE = {
-  apiKey           : FIREBASE_API_KEY,
-  authDomain       : FIREBASE_AUTH_DOMAIN,
-  projectId        : FIREBASE_PROJECT_ID,
-  storageBucket    : FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: FIREBASE_MESSAGING_ID,
-  appId            : FIREBASE_APP_ID
+const HF_CONFIG = {
+  apiKey           : HF_KEY,
+  authDomain       : HF_AUTH,
+  projectId        : HF_PROJECT,
+  storageBucket    : HF_BUCKET,
+  messagingSenderId: HF_MSGID,
+  appId            : HF_APPID
 };
 
 // -- SINGLE SOURCE OF TRUTH --
@@ -626,7 +625,7 @@ function setSyncStatus(state) {
 
 // -- FIREBASE INIT --
 function initFirebase() {
-  if (FIREBASE.apiKey.startsWith('PASTE_')) {
+  if (HF_CONFIG.apiKey.startsWith('PASTE_')) {
     setSyncStatus('local');
     return;
   }
@@ -636,9 +635,9 @@ function initFirebase() {
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js')
   ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onValue }]) => {
 
-    const fbApp = initializeApp(FIREBASE);
+    const fbApp = initializeApp(HF_CONFIG);
     // Pass the database URL explicitly - required for non-US regional databases
-    _db     = getDatabase(fbApp, FIREBASE_DB_URL);
+    _db     = getDatabase(fbApp, HF_DBURL);
     _ref    = ref;
     _set    = set;
     _remove = remove;
