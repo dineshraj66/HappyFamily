@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#FF6B6B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HappyFamily">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="https://api.iconify.design/emojione:house.svg">
+<title>HappyFamily</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --coral: #FF6B6B;
+    --coral-dark: #e85555;
+    --teal: #4ECDC4;
+    --teal-dark: #38b2aa;
+    --yellow: #FFE66D;
+    --purple: #A8DADC;
+    --dinesh: #667eea;
+    --dinesh-light: #e8edff;
+    --sushmi: #f093fb;
+    --sushmi-light: #fde8ff;
+    --bg: #f7f3ee;
+    --card: #ffffff;
+    --text: #2d3436;
+    --muted: #636e72;
+    --border: #e8e0d8;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: linear-gradient(135deg, var(--coral) 0%, #ff8e53 100%);
+    color: white;
+    padding: 20px 20px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .app-header::before {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 0; right: 0;
+    height: 60px;
+    background: var(--bg);
+    border-radius: 50% 50% 0 0 / 60px;
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; }
+  .app-title { font-family: 'Pacifico', cursive; font-size: 26px; letter-spacing: 0.5px; }
+  .app-subtitle { font-size: 13px; opacity: 0.85; margin-top: 3px; }
+  .header-icons { display: flex; gap: 8px; }
+  .header-icon-btn {
+    background: rgba(255,255,255,0.2);
+    border: none; color: white; cursor: pointer;
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: background 0.2s;
+  }
+  .header-icon-btn:hover { background: rgba(255,255,255,0.35); }
+
+  /* ── TABS ── */
+  .tab-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--card);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .tab-btn {
+    flex: 1; padding: 14px 8px 12px;
+    border: none; background: none; cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px; font-weight: 700;
+    color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: color 0.2s; position: relative;
+  }
+  .tab-btn .tab-icon { font-size: 20px; }
+  .tab-btn.active { color: var(--coral); }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute; bottom: 0; left: 20%; right: 20%;
+    height: 3px; border-radius: 3px 3px 0 0;
+    background: var(--coral);
+  }
+  .tab-badge {
+    position: absolute; top: 8px; right: calc(50% - 18px);
+    background: var(--coral); color: white;
+    border-radius: 10px; font-size: 10px; font-weight: 800;
+    min-width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; padding: 20px; min-height: calc(100vh - 140px); animation: fadeIn 0.3s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── FAB ── */
+  .fab {
+    position: fixed; bottom: 90px; right: 20px;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--coral), #ff8e53);
+    color: white; border: none; cursor: pointer;
+    font-size: 28px; font-weight: 300;
+    box-shadow: 0 6px 24px rgba(255,107,107,0.45);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    z-index: 50;
+  }
+  .fab:hover { transform: scale(1.08); box-shadow: 0 8px 32px rgba(255,107,107,0.55); }
+  .fab:active { transform: scale(0.95); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 200;
+    align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; animation: overlayIn 0.25s ease; }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--card); border-radius: 28px 28px 0 0;
+    width: 100%; max-width: 600px;
+    max-height: 92vh; display: flex; flex-direction: column;
+    animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-handle {
+    width: 40px; height: 4px; background: var(--border);
+    border-radius: 2px; margin: 12px auto 0;
+  }
+  .modal-header {
+    padding: 16px 20px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-size: 18px; font-weight: 800; }
+  .modal-close {
+    background: var(--border); border: none; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 50%;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+  }
+  .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 12px 20px 24px; border-top: 1px solid var(--border); }
+
+  /* ── ITEMS TABLE ── */
+  .items-table-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1.5px solid var(--border); }
+  .items-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+  .items-table th {
+    background: #faf7f4; padding: 10px 12px;
+    font-size: 11px; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1.5px solid var(--border); text-align: left;
+  }
+  .items-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .items-table tr:last-child td { border-bottom: none; }
+  .items-table input, .items-table select {
+    width: 100%; border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 7px 9px;
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600;
+    background: white; outline: none;
+    transition: border-color 0.2s;
+  }
+  .items-table input:focus, .items-table select:focus { border-color: var(--coral); }
+  .sno-cell { font-size: 13px; font-weight: 800; color: var(--muted); text-align: center; width: 36px; }
+  .remove-row-btn {
+    background: none; border: none; cursor: pointer;
+    color: #ccc; font-size: 18px; transition: color 0.2s;
+    padding: 4px; border-radius: 6px;
+  }
+  .remove-row-btn:hover { color: var(--coral); background: #fff0f0; }
+
+  .btn-add-row {
+    margin-top: 12px; width: 100%;
+    border: 2px dashed var(--border); background: none;
+    border-radius: var(--radius-sm); padding: 10px;
+    font-family: 'Nunito', sans-serif; font-size: 14px;
+    font-weight: 700; color: var(--muted); cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-add-row:hover { border-color: var(--coral); color: var(--coral); background: #fff5f5; }
+
+  /* Global assign toggle in modal */
+  .assign-toggle-row {
+    display: flex; align-items: center; gap: 10px;
+    margin: 14px 0 6px;
+    background: var(--bg); border-radius: var(--radius-sm); padding: 10px 14px;
+  }
+  .assign-toggle-row span { font-size: 13px; font-weight: 700; color: var(--muted); margin-right: 4px; }
+  .person-chip {
+    padding: 6px 16px; border-radius: 20px;
+    border: 2px solid var(--border); background: white;
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .person-chip.dinesh.active { background: var(--dinesh); border-color: var(--dinesh); color: white; }
+  .person-chip.sushmi.active { background: var(--sushmi); border-color: var(--sushmi); color: white; }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width: 100%; padding: 15px;
+    background: linear-gradient(135deg, var(--coral), #ff8e53);
+    color: white; border: none; border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
+    cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.93; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  /* ── HOME PAGE ── */
+  .greeting-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--radius); padding: 20px 24px;
+    color: white; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .greeting-card h2 { font-size: 20px; font-weight: 900; }
+  .greeting-card p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+  .greeting-emoji { font-size: 48px; }
+  .section-title { font-size: 14px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+  .quick-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .quick-stat-card {
+    background: var(--card); border-radius: var(--radius-sm);
+    padding: 16px; box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .quick-stat-card .stat-num { font-size: 28px; font-weight: 900; }
+  .quick-stat-card .stat-label { font-size: 12px; color: var(--muted); font-weight: 700; margin-top: 2px; }
+  .recent-list { display: flex; flex-direction: column; gap: 10px; }
+  .recent-item {
+    background: var(--card); border-radius: var(--radius-sm);
+    padding: 14px 16px; box-shadow: var(--shadow);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .recent-item-icon { font-size: 22px; }
+  .recent-item-info { flex: 1; }
+  .recent-item-info strong { font-size: 14px; display: block; }
+  .recent-item-info span { font-size: 12px; color: var(--muted); }
+  .person-tag {
+    font-size: 11px; font-weight: 800; padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .person-tag.dinesh { background: var(--dinesh-light); color: var(--dinesh); }
+  .person-tag.sushmi { background: var(--sushmi-light); color: #c44fcc; }
+  .person-tag.both { background: #e8f7e8; color: #27ae60; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .empty-icon { font-size: 56px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; font-weight: 700; }
+  .empty-state span { font-size: 13px; }
+
+  /* ── ASSIGN PAGE ── */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .filter-chip {
+    padding: 8px 20px; border-radius: 20px;
+    border: 2px solid var(--border); background: white;
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .filter-chip.active-all { background: var(--text); border-color: var(--text); color: white; }
+  .filter-chip.active-dinesh { background: var(--dinesh); border-color: var(--dinesh); color: white; }
+  .filter-chip.active-sushmi { background: var(--sushmi); border-color: var(--sushmi); color: white; }
+  .task-card {
+    background: var(--card); border-radius: var(--radius-sm);
+    box-shadow: var(--shadow); margin-bottom: 12px;
+    overflow: hidden; transition: transform 0.2s;
+  }
+  .task-card:hover { transform: translateY(-2px); }
+  .task-card-header {
+    padding: 14px 16px 10px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+  }
+  .task-card-title { font-size: 15px; font-weight: 800; flex: 1; }
+  .task-card-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .task-items-list { padding: 0 16px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .task-item-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg); border-radius: 8px; padding: 7px 12px;
+  }
+  .task-item-row .item-name { font-size: 13px; font-weight: 700; }
+  .task-item-row .item-qty { font-size: 12px; color: var(--muted); }
+  .task-card-actions { padding: 10px 16px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+  .btn-complete {
+    flex: 1; padding: 10px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: white; border: none; border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-complete:hover { opacity: 0.88; }
+  .comment-input {
+    flex: 2; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600;
+    outline: none; transition: border-color 0.2s;
+  }
+  .comment-input:focus { border-color: var(--teal); }
+  .task-date-badge {
+    background: var(--yellow); color: #7a6200;
+    font-size: 11px; font-weight: 800; padding: 3px 10px;
+    border-radius: 20px; white-space: nowrap;
+  }
+
+  /* ── HISTORY PAGE ── */
+  .history-month-group { margin-bottom: 24px; }
+  .history-month-label { font-size: 13px; font-weight: 800; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .history-card {
+    background: var(--card); border-radius: var(--radius-sm);
+    box-shadow: var(--shadow); margin-bottom: 10px; padding: 14px 16px;
+  }
+  .history-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .history-card-title { font-size: 14px; font-weight: 800; }
+  .completed-badge { background: #e8f7ee; color: #27ae60; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; }
+  .history-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .history-item-chip { background: var(--bg); border-radius: 20px; font-size: 12px; font-weight: 700; padding: 4px 12px; color: var(--text); }
+  .history-comment { margin-top: 8px; font-size: 12px; color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 4px; }
+  .history-meta { margin-top: 8px; display: flex; align-items: center; gap: 8px; }
+
+  /* ── STATS PAGE ── */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--card); border-radius: var(--radius-sm);
+    box-shadow: var(--shadow); padding: 18px 16px; text-align: center;
+  }
+  .stat-card.wide { grid-column: span 2; }
+  .stat-card .big-num { font-size: 36px; font-weight: 900; }
+  .stat-card .big-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 4px; }
+  .person-stat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .person-stat-name { font-size: 14px; font-weight: 800; min-width: 70px; }
+  .progress-bar-bg { flex: 1; height: 12px; background: var(--bg); border-radius: 6px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1); }
+  .progress-bar-fill.dinesh { background: linear-gradient(90deg, var(--dinesh), #a29bfe); }
+  .progress-bar-fill.sushmi { background: linear-gradient(90deg, var(--sushmi), #ff6b9d); }
+  .person-stat-val { font-size: 13px; font-weight: 800; min-width: 30px; text-align: right; }
+  .insight-card {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    border-radius: var(--radius-sm); padding: 16px;
+    margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .insight-card:nth-child(2) { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+  .insight-card:nth-child(3) { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); }
+  .insight-card:nth-child(4) { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
+  .insight-icon { font-size: 28px; }
+  .insight-text strong { font-size: 14px; display: block; }
+  .insight-text span { font-size: 12px; color: rgba(0,0,0,0.6); }
+  .chart-container { padding: 12px 0; }
+  .chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .chart-bar-label { font-size: 12px; font-weight: 700; min-width: 60px; color: var(--muted); }
+  .chart-bar-track { flex: 1; height: 20px; background: var(--bg); border-radius: 10px; overflow: hidden; }
+  .chart-bar-fill { height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+  .chart-bar-fill span { font-size: 11px; font-weight: 800; color: white; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    background: #2d3436; color: white; padding: 12px 24px;
+    border-radius: 25px; font-size: 14px; font-weight: 700;
+    z-index: 500; opacity: 0; transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (min-width: 600px) {
+    .app-header { padding: 28px 28px 70px; }
+    .page { padding: 24px; max-width: 600px; margin: 0 auto; }
+    .tab-bar { max-width: 600px; left: 50%; transform: translateX(-50%); }
+    .fab { right: calc(50% - 280px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="header-top">
+    <div>
+      <div class="app-title">🏠 HappyFamily</div>
+      <div class="app-subtitle">Your family task manager</div>
+    </div>
+    <div class="header-icons">
+      <button class="header-icon-btn" onclick="showPage('stats')">📊</button>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-home" onclick="showPage('home')">
+    <span class="tab-icon">🏠</span>Home
+  </button>
+  <button class="tab-btn" id="tab-assign" onclick="showPage('assign')">
+    <span class="tab-icon">📋</span>Assign
+    <span class="tab-badge" id="assign-badge" style="display:none"></span>
+  </button>
+  <button class="tab-btn" id="tab-history" onclick="showPage('history')">
+    <span class="tab-icon">📜</span>History
+  </button>
+  <button class="tab-btn" id="tab-stats" onclick="showPage('stats')">
+    <span class="tab-icon">📊</span>Stats
+  </button>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="greeting-card">
+    <div>
+      <h2 id="greeting-text">Good morning! 👋</h2>
+      <p id="greeting-date"></p>
+    </div>
+    <div class="greeting-emoji" id="greeting-emoji">🌅</div>
+  </div>
+  <div class="quick-stats">
+    <div class="quick-stat-card">
+      <div class="stat-num" id="qs-pending" style="color:var(--coral)">0</div>
+      <div class="stat-label">Pending Tasks</div>
+    </div>
+    <div class="quick-stat-card">
+      <div class="stat-num" id="qs-done" style="color:var(--teal)">0</div>
+      <div class="stat-label">Completed</div>
+    </div>
+  </div>
+  <div class="section-title">Recent Tasks</div>
+  <div class="recent-list" id="home-recent-list">
+    <div class="empty-state">
+      <div class="empty-icon">🛒</div>
+      <p>No tasks yet!</p>
+      <span>Tap the + button to add your first task</span>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIGN PAGE -->
+<div class="page" id="page-assign">
+  <div class="filter-row">
+    <button class="filter-chip active-all" id="filter-all" onclick="setFilter('all')">All</button>
+    <button class="filter-chip" id="filter-dinesh" onclick="setFilter('dinesh')">👨 Dinesh</button>
+    <button class="filter-chip" id="filter-sushmi" onclick="setFilter('sushmi')">👩 Sushmi</button>
+  </div>
+  <div id="assign-list">
+    <div class="empty-state">
+      <div class="empty-icon">✅</div>
+      <p>All clear!</p>
+      <span>No pending tasks assigned</span>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY PAGE -->
+<div class="page" id="page-history">
+  <div id="history-list">
+    <div class="empty-state">
+      <div class="empty-icon">📜</div>
+      <p>No history yet</p>
+      <span>Completed tasks will appear here</span>
+    </div>
+  </div>
+</div>
+
+<!-- STATS PAGE -->
+<div class="page" id="page-stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="big-num" id="st-total" style="color:var(--coral)">0</div>
+      <div class="big-label">Total Tasks</div>
+    </div>
+    <div class="stat-card">
+      <div class="big-num" id="st-complete" style="color:var(--teal)">0</div>
+      <div class="big-label">Completed</div>
+    </div>
+    <div class="stat-card wide">
+      <div class="section-title" style="text-align:left;margin-bottom:16px">Task Distribution</div>
+      <div class="person-stat-row">
+        <span class="person-stat-name" style="color:var(--dinesh)">👨 Dinesh</span>
+        <div class="progress-bar-bg"><div class="progress-bar-fill dinesh" id="bar-dinesh" style="width:0%"></div></div>
+        <span class="person-stat-val" id="val-dinesh">0</span>
+      </div>
+      <div class="person-stat-row">
+        <span class="person-stat-name" style="color:#c44fcc">👩 Sushmi</span>
+        <div class="progress-bar-bg"><div class="progress-bar-fill sushmi" id="bar-sushmi" style="width:0%"></div></div>
+        <span class="person-stat-val" id="val-sushmi">0</span>
+      </div>
+    </div>
+    <div class="stat-card wide">
+      <div class="section-title" style="text-align:left;margin-bottom:16px">Completion Rate by Day</div>
+      <div class="chart-container" id="day-chart">
+        <div style="color:var(--muted);font-size:13px;text-align:center">No data yet</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-title">Insights 💡</div>
+  <div id="insights-container">
+    <div class="empty-state"><div class="empty-icon">🔮</div><p>No insights yet</p><span>Complete some tasks to see insights!</span></div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab-btn" onclick="openModal()">+</button>
+
+<!-- ADD TASK MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">📝 New Task List</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="assign-toggle-row">
+        <span>Assign all to:</span>
+        <button class="person-chip dinesh" id="global-dinesh" onclick="setGlobalAssign('Dinesh')">👨 Dinesh</button>
+        <button class="person-chip sushmi" id="global-sushmi" onclick="setGlobalAssign('Sushmi')">👩 Sushmi</button>
+        <button class="person-chip" id="global-none" onclick="setGlobalAssign('')" style="background:var(--bg)">Individual</button>
+      </div>
+      <div class="items-table-wrap">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width:36px">#</th>
+              <th>Item Name</th>
+              <th style="width:70px">Qty</th>
+              <th style="width:90px">Unit</th>
+              <th style="width:110px">Assign To</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody id="items-tbody"></tbody>
+        </table>
+      </div>
+      <button class="btn-add-row" onclick="addItemRow()">＋ Add Item</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="submitTasks()">🚀 Create Task List</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+// ─────────────────────────────────────────────
+//  FIREBASE CONFIG — replace with your own config
+//  from https://console.firebase.google.com
+// ─────────────────────────────────────────────
+const firebaseConfig = {
+   apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
+  authDomain: "happyfamily-e4f68.firebaseapp.com",
+  projectId: "happyfamily-e4f68",
+  storageBucket: "happyfamily-e4f68.firebasestorage.app",
+  messagingSenderId: "740546226739",
+  appId: "1:740546226739:web:8247b42ed7b059fe5a9146",
+  measurementId: "G-H33FZ6MZPW"
+};
+
+let db;
+let appData = { tasks: {}, history: {} };
+let useFirebase = false;
+
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+  // Test connection
+  if (!firebaseConfig.apiKey.includes('YOUR')) {
+    useFirebase = true;
+    listenFirebase();
+  } else {
+    loadLocal();
+  }
+} catch(e) {
+  loadLocal();
+}
+
+function listenFirebase() {
+  onValue(ref(db, 'happyfamily'), (snap) => {
+    const data = snap.val() || {};
+    appData.tasks = data.tasks || {};
+    appData.history = data.history || {};
+    renderAll();
+  });
+}
+
+function loadLocal() {
+  try {
+    const saved = localStorage.getItem('happyfamily');
+    if (saved) { appData = JSON.parse(saved); }
+  } catch(e) {}
+  renderAll();
+}
+
+function saveLocal() {
+  try { localStorage.setItem('happyfamily', JSON.stringify(appData)); } catch(e) {}
+}
+
+window._saveTask = async function(taskObj) {
+  const id = 'task_' + Date.now();
+  taskObj.id = id;
+  appData.tasks[id] = taskObj;
+  if (useFirebase) {
+    await set(ref(db, `happyfamily/tasks/${id}`), taskObj);
+  } else {
+    saveLocal();
+    renderAll();
+  }
+};
+
+window._completeTask = async function(taskId, comment) {
+  const task = appData.tasks[taskId];
+  if (!task) return;
+  task.completedAt = new Date().toISOString();
+  task.comment = comment;
+  task.status = 'done';
+  const histId = 'hist_' + Date.now();
+  appData.history[histId] = task;
+  delete appData.tasks[taskId];
+  if (useFirebase) {
+    await set(ref(db, `happyfamily/history/${histId}`), task);
+    await remove(ref(db, `happyfamily/tasks/${taskId}`));
+  } else {
+    saveLocal();
+    renderAll();
+  }
+};
+</script>
+
+<script>
+// ── STATE ──
+let currentFilter = 'all';
+let globalAssign = '';
+let rowCount = 0;
+
+// ── GREETING ──
+function updateGreeting() {
+  const h = new Date().getHours();
+  const greetings = [
+    [5, '☀️', 'Good morning!', '🌅'],
+    [12, '😊', 'Good afternoon!', '☀️'],
+    [17, '🌆', 'Good evening!', '🌆'],
+    [21, '🌙', 'Good night!', '🌙'],
+  ];
+  let g = greetings[3];
+  for (const [hour, , text, emoji] of greetings) { if (h < hour+7) { g = greetings[greetings.indexOf(greetings.find(x=>x[0]===hour))]; break; } }
+  const msgs = ['Good morning! 👋', 'Good afternoon! ☀️', 'Good evening! 🌆', 'Good night! 🌙'];
+  const emojis = ['🌅', '☀️', '🌆', '🌙'];
+  const idx = h < 12 ? 0 : h < 17 ? 1 : h < 21 ? 2 : 3;
+  document.getElementById('greeting-text').textContent = msgs[idx];
+  document.getElementById('greeting-emoji').textContent = emojis[idx];
+  const now = new Date();
+  document.getElementById('greeting-date').textContent = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+}
+
+// ── PAGE NAV ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'stats') renderStats();
+}
+
+// ── MODAL ──
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('items-tbody').innerHTML = '';
+  rowCount = 0;
+  globalAssign = '';
+  updateGlobalChips();
+  addItemRow();
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+// ── GLOBAL ASSIGN ──
+function setGlobalAssign(val) {
+  globalAssign = val;
+  updateGlobalChips();
+  // Update all selects
+  document.querySelectorAll('.assign-select').forEach(sel => {
+    if (val) sel.value = val;
+  });
+}
+function updateGlobalChips() {
+  document.getElementById('global-dinesh').classList.toggle('active', globalAssign === 'Dinesh');
+  document.getElementById('global-sushmi').classList.toggle('active', globalAssign === 'Sushmi');
+  document.getElementById('global-none').classList.toggle('active', globalAssign === '');
+}
+
+// ── ADD ROW ──
+function addItemRow() {
+  rowCount++;
+  const tbody = document.getElementById('items-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="sno-cell">${rowCount}</td>
+    <td><input type="text" placeholder="e.g. Milk" class="item-name-input"></td>
+    <td><input type="number" placeholder="1" min="1" class="item-qty-input" style="text-align:center"></td>
+    <td>
+      <select class="item-unit-input">
+        <option>Pieces</option>
+        <option>Qty</option>
+        <option>Kg</option>
+        <option>Litre</option>
+        <option>Pack</option>
+        <option>Dozen</option>
+      </select>
+    </td>
+    <td>
+      <select class="assign-select">
+        <option value="">Both</option>
+        <option value="Dinesh">👨 Dinesh</option>
+        <option value="Sushmi">👩 Sushmi</option>
+      </select>
+    </td>
+    <td><button class="remove-row-btn" onclick="removeRow(this)">✕</button></td>
+  `;
+  if (globalAssign) tr.querySelector('.assign-select').value = globalAssign;
+  tbody.appendChild(tr);
+  tr.querySelector('.item-name-input').focus();
+}
+
+function removeRow(btn) {
+  const tr = btn.closest('tr');
+  tr.remove();
+  // Renumber
+  document.querySelectorAll('#items-tbody tr').forEach((row, i) => {
+    row.querySelector('.sno-cell').textContent = i + 1;
+  });
+  rowCount = document.querySelectorAll('#items-tbody tr').length;
+}
+
+// ── SUBMIT ──
+function submitTasks() {
+  const rows = document.querySelectorAll('#items-tbody tr');
+  const items = [];
+  let valid = true;
+  rows.forEach(row => {
+    const name = row.querySelector('.item-name-input').value.trim();
+    if (!name) { valid = false; row.querySelector('.item-name-input').style.borderColor = 'var(--coral)'; return; }
+    const qty = row.querySelector('.item-qty-input').value || '1';
+    const unit = row.querySelector('.item-unit-input').value;
+    const assignTo = row.querySelector('.assign-select').value || 'Both';
+    items.push({ name, qty, unit, assignTo });
+  });
+  if (!valid) { showToast('⚠️ Please fill all item names'); return; }
+  if (items.length === 0) { showToast('⚠️ Add at least one item'); return; }
+
+  const taskObj = {
+    items,
+    createdAt: new Date().toISOString(),
+    status: 'pending',
+    title: items.map(i => i.name).join(', ').substring(0, 40) + (items.length > 2 ? '...' : '')
+  };
+
+  window._saveTask(taskObj);
+  closeModal();
+  showToast('✅ Task list created!');
+  showPage('assign');
+}
+
+// ── FILTER ──
+function setFilter(f) {
+  currentFilter = f;
+  ['all','dinesh','sushmi'].forEach(x => {
+    const btn = document.getElementById('filter-' + x);
+    btn.className = 'filter-chip' + (f === x ? ` active-${x}` : '');
+  });
+  renderAssign();
+}
+
+// ── RENDER ALL ──
+function renderAll() {
+  renderHome();
+  renderAssign();
+  renderHistory();
+  updateBadge();
+}
+
+function renderHome() {
+  const tasks = Object.values(window.appData?.tasks || appData?.tasks || {});
+  const hist = Object.values(window.appData?.history || appData?.history || {});
+  document.getElementById('qs-pending').textContent = tasks.length;
+  document.getElementById('qs-done').textContent = hist.length;
+
+  const list = document.getElementById('home-recent-list');
+  const all = [...tasks, ...hist].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0,5);
+  if (all.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🛒</div><p>No tasks yet!</p><span>Tap + to add your first task</span></div>`;
+    return;
+  }
+  list.innerHTML = all.map(t => {
+    const persons = [...new Set(t.items.map(i => i.assignTo))];
+    const tagClass = persons.includes('Both') || persons.length > 1 ? 'both' : persons[0]?.toLowerCase() || 'both';
+    const tagText = tagClass === 'both' ? '👨👩 Both' : tagClass === 'dinesh' ? '👨 Dinesh' : '👩 Sushmi';
+    const isDone = t.status === 'done';
+    return `<div class="recent-item" style="${isDone ? 'opacity:0.65' : ''}">
+      <div class="recent-item-icon">${isDone ? '✅' : '🛒'}</div>
+      <div class="recent-item-info">
+        <strong>${t.title || 'Task list'}</strong>
+        <span>${t.items.length} item${t.items.length !== 1 ? 's' : ''} • ${fmtDate(t.createdAt)}</span>
+      </div>
+      <span class="person-tag ${tagClass}">${tagText}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderAssign() {
+  const tasks = Object.values(appData.tasks || {}).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const list = document.getElementById('assign-list');
+  let filtered = tasks;
+  if (currentFilter !== 'all') {
+    const person = currentFilter === 'dinesh' ? 'Dinesh' : 'Sushmi';
+    filtered = tasks.filter(t => t.items.some(i => i.assignTo === person || i.assignTo === 'Both'));
+  }
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><p>All clear!</p><span>No pending tasks</span></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(task => {
+    const persons = [...new Set(task.items.map(i => i.assignTo === 'Both' ? 'Both' : i.assignTo))];
+    const tagClass = persons.includes('Both') || persons.length > 1 ? 'both' : persons[0]?.toLowerCase() || 'both';
+    const tagText = tagClass === 'both' ? '👨👩 Both' : tagClass === 'dinesh' ? '👨 Dinesh' : '👩 Sushmi';
+    const itemsToShow = currentFilter !== 'all'
+      ? task.items.filter(i => i.assignTo === (currentFilter === 'dinesh' ? 'Dinesh' : 'Sushmi') || i.assignTo === 'Both')
+      : task.items;
+    return `<div class="task-card">
+      <div class="task-card-header">
+        <div>
+          <div class="task-card-title">${task.title || 'Task list'}</div>
+          <div class="task-card-meta">${task.items.length} item${task.items.length!==1?'s':''}</div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span class="person-tag ${tagClass}">${tagText}</span>
+          <span class="task-date-badge">${fmtDate(task.createdAt)}</span>
+        </div>
+      </div>
+      <div class="task-items-list">
+        ${itemsToShow.map(item => `<div class="task-item-row">
+          <span class="item-name">🔹 ${item.name}</span>
+          <span class="item-qty">${item.qty} ${item.unit} · <b style="color:${item.assignTo==='Dinesh'?'var(--dinesh)':item.assignTo==='Sushmi'?'#c44fcc':'#27ae60'}">${item.assignTo}</b></span>
+        </div>`).join('')}
+      </div>
+      <div class="task-card-actions">
+        <input type="text" class="comment-input" placeholder="💬 Optional comment..." id="comment-${task.id}">
+        <button class="btn-complete" onclick="completeTask('${task.id}')">✓ Done</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory() {
+  const hist = Object.values(appData.history || {}).sort((a,b) => new Date(b.completedAt) - new Date(a.completedAt));
+  const list = document.getElementById('history-list');
+  if (hist.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📜</div><p>No history yet</p><span>Completed tasks will appear here</span></div>`;
+    return;
+  }
+  // Group by month
+  const groups = {};
+  hist.forEach(h => {
+    const key = new Date(h.completedAt).toLocaleDateString('en-US', { year:'numeric', month:'long' });
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(h);
+  });
+  list.innerHTML = Object.entries(groups).map(([month, items]) => `
+    <div class="history-month-group">
+      <div class="history-month-label">📅 ${month} <span style="color:var(--coral);margin-left:6px">${items.length}</span></div>
+      ${items.map(t => `<div class="history-card">
+        <div class="history-card-header">
+          <div class="history-card-title">${t.title || 'Task list'}</div>
+          <span class="completed-badge">✅ Done</span>
+        </div>
+        <div class="history-items">
+          ${t.items.map(i => `<span class="history-item-chip">🔹 ${i.name} · ${i.qty} ${i.unit}</span>`).join('')}
+        </div>
+        <div class="history-meta">
+          ${[...new Set(t.items.map(i=>i.assignTo))].map(p=>`<span class="person-tag ${p==='Dinesh'?'dinesh':p==='Sushmi'?'sushmi':'both'}">${p==='Dinesh'?'👨':'p'==='Sushmi'?'👩':'👨👩'} ${p}</span>`).join('')}
+          <span style="font-size:12px;color:var(--muted);margin-left:auto">${fmtDate(t.completedAt)}</span>
+        </div>
+        ${t.comment ? `<div class="history-comment">💬 "${t.comment}"</div>` : ''}
+      </div>`).join('')}
+    </div>
+  `).join('');
+}
+
+function renderStats() {
+  const tasks = Object.values(appData.tasks || {});
+  const hist = Object.values(appData.history || {});
+  const all = [...tasks, ...hist];
+  document.getElementById('st-total').textContent = all.length;
+  document.getElementById('st-complete').textContent = hist.length;
+
+  // Person distribution (by tasks completed)
+  const dCount = hist.filter(t => t.items.some(i => i.assignTo === 'Dinesh' || i.assignTo === 'Both')).length;
+  const sCount = hist.filter(t => t.items.some(i => i.assignTo === 'Sushmi' || i.assignTo === 'Both')).length;
+  const total = dCount + sCount || 1;
+  document.getElementById('bar-dinesh').style.width = (dCount/total*100) + '%';
+  document.getElementById('bar-sushmi').style.width = (sCount/total*100) + '%';
+  document.getElementById('val-dinesh').textContent = dCount;
+  document.getElementById('val-sushmi').textContent = sCount;
+
+  // Day chart
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dayCounts = [0,0,0,0,0,0,0];
+  hist.forEach(t => { dayCounts[new Date(t.completedAt).getDay()]++; });
+  const maxDay = Math.max(...dayCounts, 1);
+  const colors = ['#FF6B6B','#4ECDC4','#667eea','#f093fb','#FFE66D','#ff8e53','#a8dadc'];
+  document.getElementById('day-chart').innerHTML = dayCounts.map((cnt, i) => `
+    <div class="chart-bar-row">
+      <span class="chart-bar-label">${dayNames[i]}</span>
+      <div class="chart-bar-track">
+        <div class="chart-bar-fill" style="width:${cnt/maxDay*100}%;background:${colors[i]}">
+          ${cnt > 0 ? `<span>${cnt}</span>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Insights
+  const insights = [];
+  if (hist.length === 0) {
+    document.getElementById('insights-container').innerHTML = `<div class="empty-state"><div class="empty-icon">🔮</div><p>No insights yet</p><span>Complete some tasks to see insights!</span></div>`;
+    return;
+  }
+  if (dCount > sCount) insights.push({icon:'💪', title:`Dinesh is on fire!`, text:`Dinesh has completed ${dCount} tasks vs Sushmi's ${sCount}`});
+  else if (sCount > dCount) insights.push({icon:'⭐', title:`Sushmi is leading!`, text:`Sushmi has completed ${sCount} tasks vs Dinesh's ${dCount}`});
+  else insights.push({icon:'🤝', title:`Perfect teamwork!`, text:`Both completed equal tasks — great balance!`});
+
+  const busyDay = dayCounts.indexOf(Math.max(...dayCounts));
+  if (dayCounts[busyDay] > 0) insights.push({icon:'📅', title:`Busiest day: ${dayNames[busyDay]}`, text:`Most tasks get done on ${dayNames[busyDay]}s`});
+
+  const avgItems = hist.length > 0 ? (hist.reduce((s,t) => s + t.items.length, 0) / hist.length).toFixed(1) : 0;
+  insights.push({icon:'📦', title:`Avg ${avgItems} items per task`, text:`Your task lists are nicely sized`});
+
+  const streak = getStreak(hist);
+  if (streak > 1) insights.push({icon:'🔥', title:`${streak}-day streak!`, text:`You've completed tasks ${streak} days in a row`});
+
+  document.getElementById('insights-container').innerHTML = insights.map(ins => `
+    <div class="insight-card">
+      <div class="insight-icon">${ins.icon}</div>
+      <div class="insight-text"><strong>${ins.title}</strong><span>${ins.text}</span></div>
+    </div>`).join('');
+}
+
+function getStreak(hist) {
+  const days = new Set(hist.map(t => new Date(t.completedAt).toDateString()));
+  let streak = 0, d = new Date();
+  while (days.has(d.toDateString())) { streak++; d.setDate(d.getDate()-1); }
+  return streak;
+}
+
+// ── COMPLETE TASK ──
+function completeTask(taskId) {
+  const comment = document.getElementById('comment-' + taskId)?.value || '';
+  window._completeTask(taskId, comment);
+  showToast('🎉 Task completed!');
+}
+
+// ── UTILS ──
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = Math.floor((now - d) / 86400000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+function updateBadge() {
+  const count = Object.keys(appData.tasks || {}).length;
+  const badge = document.getElementById('assign-badge');
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Make appData global for firebase module
+window.appData = appData;
+window._saveTask = window._saveTask || async function(obj) {
+  const id = 'task_' + Date.now();
+  obj.id = id;
+  appData.tasks[id] = obj;
+  window.appData = appData;
+  saveLocal();
+  renderAll();
+};
+window._completeTask = window._completeTask || async function(taskId, comment) {
+  const task = appData.tasks[taskId];
+  if (!task) return;
+  task.completedAt = new Date().toISOString();
+  task.comment = comment;
+  task.status = 'done';
+  const histId = 'hist_' + Date.now();
+  appData.history[histId] = task;
+  delete appData.tasks[taskId];
+  window.appData = appData;
+  saveLocal();
+  renderAll();
+};
+
+function saveLocal() {
+  try { localStorage.setItem('happyfamily', JSON.stringify(appData)); } catch(e) {}
+}
+
+function loadLocal() {
+  try { const s = localStorage.getItem('happyfamily'); if (s) { const d = JSON.parse(s); appData.tasks = d.tasks||{}; appData.history = d.history||{}; window.appData = appData; } } catch(e) {}
+  renderAll();
+}
+
+// INIT
+updateGreeting();
+loadLocal();
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
