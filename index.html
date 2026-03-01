@@ -551,16 +551,24 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script>
+// ════════════════════════════════════════════════
+//  HAPPYFAMILY — SINGLE UNIFIED SCRIPT
+// ════════════════════════════════════════════════
 
-// ─────────────────────────────────────────────
-//  FIREBASE CONFIG — replace with your own config
-//  from https://console.firebase.google.com
-// ─────────────────────────────────────────────
-const firebaseConfig = {
+// ┌─────────────────────────────────────────────────────────────────┐
+// │  🔥 FIREBASE CONFIG — PASTE YOUR VALUES HERE                   │
+// │                                                                 │
+// │  How to get these values:                                       │
+// │  1. Go to https://console.firebase.google.com                  │
+// │  2. Create project → "HappyFamily"                             │
+// │  3. Build → Realtime Database → Create database (test mode)    │
+// │  4. Project Settings ⚙️ → Your apps → Add Web app (</>)        │
+// │  5. Copy each value from the firebaseConfig shown there        │
+// │                                                                 │
+// │  Leave as-is to use local storage only (single device)         │
+// └─────────────────────────────────────────────────────────────────┘
+const FIREBASE = {
    apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
   authDomain: "happyfamily-e4f68.firebaseapp.com",
   projectId: "happyfamily-e4f68",
@@ -569,101 +577,124 @@ const firebaseConfig = {
   appId: "1:740546226739:web:8247b42ed7b059fe5a9146",
   measurementId: "G-H33FZ6MZPW"
 };
+// ─────────────────────────────────────────────────────────────────
 
-let db;
-let appData = { tasks: {}, history: {} };
-let useFirebase = false;
+// ── DATA STORE (single source of truth) ──
+const appData = { tasks: {}, history: {} };
 
-try {
-  const app = initializeApp(firebaseConfig);
-  db = getDatabase(app);
-  // Test connection
-  if (!firebaseConfig.apiKey.includes('YOUR')) {
-    useFirebase = true;
-    listenFirebase();
-  } else {
-    loadLocal();
+// ── FIREBASE RUNTIME ──
+let fbDatabase = null;
+let fbConnected = false;
+
+function initFirebase() {
+  // Only activate if user has pasted real keys (not the PASTE_YOUR_... placeholders)
+  if (FIREBASE.apiKey.startsWith('PASTE_')) {
+    console.info('HappyFamily: Firebase not configured — using localStorage only.');
+    return;
   }
-} catch(e) {
-  loadLocal();
+  try {
+    // Load Firebase SDK dynamically so it doesn't block the app if offline
+    const sdkBase = 'https://www.gstatic.com/firebasejs/10.7.1/';
+    Promise.all([
+      import(sdkBase + 'firebase-app.js'),
+      import(sdkBase + 'firebase-database.js')
+    ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onValue }]) => {
+      const fbApp  = initializeApp(FIREBASE);
+      fbDatabase   = getDatabase(fbApp);
+      fbConnected  = true;
+      console.info('HappyFamily: Firebase connected ✓');
+
+      // Live-sync: whenever Firebase data changes, update local appData & re-render
+      onValue(ref(fbDatabase, 'happyfamily'), (snap) => {
+        const d = snap.val() || {};
+        appData.tasks   = d.tasks   || {};
+        appData.history = d.history || {};
+        saveLocal(); // keep local copy in sync too
+        renderAll();
+      });
+
+      // Push existing local data up to Firebase on first connect
+      set(ref(fbDatabase, 'happyfamily'), {
+        tasks  : appData.tasks,
+        history: appData.history
+      });
+
+      // Store helpers for use in save/complete functions
+      window._fb = { ref, set, remove };
+    }).catch(err => {
+      console.warn('HappyFamily: Firebase failed to load —', err.message);
+    });
+  } catch(e) {
+    console.warn('HappyFamily: Firebase init error —', e.message);
+  }
 }
 
-function listenFirebase() {
-  onValue(ref(db, 'happyfamily'), (snap) => {
-    const data = snap.val() || {};
-    appData.tasks = data.tasks || {};
-    appData.history = data.history || {};
-    renderAll();
-  });
+// ── LOCAL PERSISTENCE ──
+function saveLocal() {
+  try { localStorage.setItem('hf_data', JSON.stringify(appData)); } catch(e) {}
 }
 
 function loadLocal() {
   try {
-    const saved = localStorage.getItem('happyfamily');
-    if (saved) { appData = JSON.parse(saved); }
+    const s = localStorage.getItem('hf_data');
+    if (s) {
+      const d = JSON.parse(s);
+      appData.tasks   = d.tasks   || {};
+      appData.history = d.history || {};
+    }
   } catch(e) {}
+}
+
+// Push full state to Firebase (debounced helper)
+function syncFirebase() {
+  if (!fbConnected || !window._fb) return;
+  window._fb.set(window._fb.ref(fbDatabase, 'happyfamily'), {
+    tasks  : appData.tasks,
+    history: appData.history
+  }).catch(()=>{});
+}
+
+// ── TASK OPERATIONS ──
+function saveTask(taskObj) {
+  const id = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
+  taskObj.id = id;
+  appData.tasks[id] = taskObj;
+  saveLocal();
+  syncFirebase();
   renderAll();
 }
 
-function saveLocal() {
-  try { localStorage.setItem('happyfamily', JSON.stringify(appData)); } catch(e) {}
-}
-
-window._saveTask = async function(taskObj) {
-  const id = 'task_' + Date.now();
-  taskObj.id = id;
-  appData.tasks[id] = taskObj;
-  if (useFirebase) {
-    await set(ref(db, `happyfamily/tasks/${id}`), taskObj);
-  } else {
-    saveLocal();
-    renderAll();
-  }
-};
-
-window._completeTask = async function(taskId, comment) {
+function completeTask(taskId) {
+  const comment = (document.getElementById('comment-' + taskId) || {}).value || '';
   const task = appData.tasks[taskId];
   if (!task) return;
   task.completedAt = new Date().toISOString();
-  task.comment = comment;
-  task.status = 'done';
-  const histId = 'hist_' + Date.now();
-  appData.history[histId] = task;
+  task.comment = comment.trim();
+  task.status   = 'done';
+  const histId  = 'hist_' + Date.now();
+  appData.history[histId] = JSON.parse(JSON.stringify(task));
   delete appData.tasks[taskId];
-  if (useFirebase) {
-    await set(ref(db, `happyfamily/history/${histId}`), task);
-    await remove(ref(db, `happyfamily/tasks/${taskId}`));
-  } else {
-    saveLocal();
-    renderAll();
-  }
-};
-</script>
+  saveLocal();
+  syncFirebase();
+  renderAll();
+  showToast('🎉 Task completed!');
+}
 
-<script>
-// ── STATE ──
+// ── UI STATE ──
 let currentFilter = 'all';
-let globalAssign = '';
-let rowCount = 0;
+let globalAssign  = '';
+let rowCount      = 0;
 
 // ── GREETING ──
 function updateGreeting() {
-  const h = new Date().getHours();
-  const greetings = [
-    [5, '☀️', 'Good morning!', '🌅'],
-    [12, '😊', 'Good afternoon!', '☀️'],
-    [17, '🌆', 'Good evening!', '🌆'],
-    [21, '🌙', 'Good night!', '🌙'],
-  ];
-  let g = greetings[3];
-  for (const [hour, , text, emoji] of greetings) { if (h < hour+7) { g = greetings[greetings.indexOf(greetings.find(x=>x[0]===hour))]; break; } }
-  const msgs = ['Good morning! 👋', 'Good afternoon! ☀️', 'Good evening! 🌆', 'Good night! 🌙'];
+  const h    = new Date().getHours();
+  const idx  = h < 12 ? 0 : h < 17 ? 1 : h < 21 ? 2 : 3;
+  const msgs  = ['Good morning! 👋', 'Good afternoon! ☀️', 'Good evening! 🌆', 'Good night! 🌙'];
   const emojis = ['🌅', '☀️', '🌆', '🌙'];
-  const idx = h < 12 ? 0 : h < 17 ? 1 : h < 21 ? 2 : 3;
-  document.getElementById('greeting-text').textContent = msgs[idx];
+  document.getElementById('greeting-text').textContent  = msgs[idx];
   document.getElementById('greeting-emoji').textContent = emojis[idx];
-  const now = new Date();
-  document.getElementById('greeting-date').textContent = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  document.getElementById('greeting-date').textContent  =
+    new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
 }
 
 // ── PAGE NAV ──
@@ -679,7 +710,7 @@ function showPage(name) {
 function openModal() {
   document.getElementById('modal-overlay').classList.add('open');
   document.getElementById('items-tbody').innerHTML = '';
-  rowCount = 0;
+  rowCount     = 0;
   globalAssign = '';
   updateGlobalChips();
   addItemRow();
@@ -691,39 +722,32 @@ function closeModalOutside(e) { if (e.target === document.getElementById('modal-
 function setGlobalAssign(val) {
   globalAssign = val;
   updateGlobalChips();
-  // Update all selects
-  document.querySelectorAll('.assign-select').forEach(sel => {
-    if (val) sel.value = val;
-  });
+  document.querySelectorAll('.assign-select').forEach(sel => { if (val) sel.value = val; });
 }
 function updateGlobalChips() {
   document.getElementById('global-dinesh').classList.toggle('active', globalAssign === 'Dinesh');
   document.getElementById('global-sushmi').classList.toggle('active', globalAssign === 'Sushmi');
-  document.getElementById('global-none').classList.toggle('active', globalAssign === '');
+  document.getElementById('global-none').classList.toggle('active',   globalAssign === '');
 }
 
-// ── ADD ROW ──
+// ── ADD / REMOVE ROWS ──
 function addItemRow() {
   rowCount++;
   const tbody = document.getElementById('items-tbody');
-  const tr = document.createElement('tr');
+  const tr    = document.createElement('tr');
   tr.innerHTML = `
     <td class="sno-cell">${rowCount}</td>
-    <td><input type="text" placeholder="e.g. Milk" class="item-name-input"></td>
-    <td><input type="number" placeholder="1" min="1" class="item-qty-input" style="text-align:center"></td>
+    <td><input type="text"   placeholder="e.g. Milk"  class="item-name-input"></td>
+    <td><input type="number" placeholder="1" min="1"  class="item-qty-input" style="text-align:center"></td>
     <td>
       <select class="item-unit-input">
-        <option>Pieces</option>
-        <option>Qty</option>
-        <option>Kg</option>
-        <option>Litre</option>
-        <option>Pack</option>
-        <option>Dozen</option>
+        <option>Pieces</option><option>Qty</option><option>Kg</option>
+        <option>Litre</option><option>Pack</option><option>Dozen</option>
       </select>
     </td>
     <td>
       <select class="assign-select">
-        <option value="">Both</option>
+        <option value="Both">Both</option>
         <option value="Dinesh">👨 Dinesh</option>
         <option value="Sushmi">👩 Sushmi</option>
       </select>
@@ -736,39 +760,47 @@ function addItemRow() {
 }
 
 function removeRow(btn) {
-  const tr = btn.closest('tr');
-  tr.remove();
-  // Renumber
+  btn.closest('tr').remove();
   document.querySelectorAll('#items-tbody tr').forEach((row, i) => {
     row.querySelector('.sno-cell').textContent = i + 1;
   });
   rowCount = document.querySelectorAll('#items-tbody tr').length;
 }
 
-// ── SUBMIT ──
+// ── SUBMIT TASKS ──
 function submitTasks() {
-  const rows = document.querySelectorAll('#items-tbody tr');
+  const rows  = document.querySelectorAll('#items-tbody tr');
   const items = [];
-  let valid = true;
+  let valid   = true;
+
   rows.forEach(row => {
-    const name = row.querySelector('.item-name-input').value.trim();
-    if (!name) { valid = false; row.querySelector('.item-name-input').style.borderColor = 'var(--coral)'; return; }
-    const qty = row.querySelector('.item-qty-input').value || '1';
-    const unit = row.querySelector('.item-unit-input').value;
-    const assignTo = row.querySelector('.assign-select').value || 'Both';
+    const nameEl = row.querySelector('.item-name-input');
+    const name   = nameEl.value.trim();
+    if (!name) {
+      valid = false;
+      nameEl.style.borderColor = 'var(--coral)';
+      nameEl.addEventListener('input', () => nameEl.style.borderColor = '', { once: true });
+      return;
+    }
+    const qty      = row.querySelector('.item-qty-input').value  || '1';
+    const unit     = row.querySelector('.item-unit-input').value;
+    const assignTo = row.querySelector('.assign-select').value   || 'Both';
     items.push({ name, qty, unit, assignTo });
   });
-  if (!valid) { showToast('⚠️ Please fill all item names'); return; }
-  if (items.length === 0) { showToast('⚠️ Add at least one item'); return; }
 
-  const taskObj = {
+  if (!valid)          { showToast('⚠️ Please fill all item names'); return; }
+  if (items.length === 0) { showToast('⚠️ Add at least one item');  return; }
+
+  const allNames = items.map(i => i.name).join(', ');
+  const title    = allNames.length > 42 ? allNames.substring(0, 42) + '…' : allNames;
+
+  saveTask({
     items,
-    createdAt: new Date().toISOString(),
-    status: 'pending',
-    title: items.map(i => i.name).join(', ').substring(0, 40) + (items.length > 2 ? '...' : '')
-  };
+    title,
+    createdAt : new Date().toISOString(),
+    status    : 'pending'
+  });
 
-  window._saveTask(taskObj);
   closeModal();
   showToast('✅ Task list created!');
   showPage('assign');
@@ -778,8 +810,8 @@ function submitTasks() {
 function setFilter(f) {
   currentFilter = f;
   ['all','dinesh','sushmi'].forEach(x => {
-    const btn = document.getElementById('filter-' + x);
-    btn.className = 'filter-chip' + (f === x ? ` active-${x}` : '');
+    document.getElementById('filter-' + x).className =
+      'filter-chip' + (f === x ? ` active-${x}` : '');
   });
   renderAssign();
 }
@@ -792,165 +824,207 @@ function renderAll() {
   updateBadge();
 }
 
+// ── HOME ──
 function renderHome() {
-  const tasks = Object.values(window.appData?.tasks || appData?.tasks || {});
-  const hist = Object.values(window.appData?.history || appData?.history || {});
+  const tasks = Object.values(appData.tasks);
+  const hist  = Object.values(appData.history);
   document.getElementById('qs-pending').textContent = tasks.length;
-  document.getElementById('qs-done').textContent = hist.length;
+  document.getElementById('qs-done').textContent    = hist.length;
 
   const list = document.getElementById('home-recent-list');
-  const all = [...tasks, ...hist].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0,5);
+  const all  = [...tasks, ...hist]
+    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
+
   if (all.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🛒</div><p>No tasks yet!</p><span>Tap + to add your first task</span></div>`;
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🛒</div>
+      <p>No tasks yet!</p><span>Tap + to add your first task</span>
+    </div>`;
     return;
   }
+
   list.innerHTML = all.map(t => {
-    const persons = [...new Set(t.items.map(i => i.assignTo))];
-    const tagClass = persons.includes('Both') || persons.length > 1 ? 'both' : persons[0]?.toLowerCase() || 'both';
-    const tagText = tagClass === 'both' ? '👨👩 Both' : tagClass === 'dinesh' ? '👨 Dinesh' : '👩 Sushmi';
-    const isDone = t.status === 'done';
-    return `<div class="recent-item" style="${isDone ? 'opacity:0.65' : ''}">
-      <div class="recent-item-icon">${isDone ? '✅' : '🛒'}</div>
+    const persons  = [...new Set(t.items.map(i => i.assignTo))];
+    const tagClass = (persons.includes('Both') || persons.length > 1)
+      ? 'both' : persons[0]?.toLowerCase() || 'both';
+    const tagText  = tagClass === 'both' ? '👨👩 Both'
+      : tagClass === 'dinesh' ? '👨 Dinesh' : '👩 Sushmi';
+    return `<div class="recent-item" style="${t.status==='done'?'opacity:0.6':''}">
+      <div class="recent-item-icon">${t.status==='done'?'✅':'🛒'}</div>
       <div class="recent-item-info">
-        <strong>${t.title || 'Task list'}</strong>
-        <span>${t.items.length} item${t.items.length !== 1 ? 's' : ''} • ${fmtDate(t.createdAt)}</span>
+        <strong>${esc(t.title || 'Task list')}</strong>
+        <span>${t.items.length} item${t.items.length!==1?'s':''} · ${fmtDate(t.createdAt)}</span>
       </div>
       <span class="person-tag ${tagClass}">${tagText}</span>
     </div>`;
   }).join('');
 }
 
+// ── ASSIGN ──
 function renderAssign() {
-  const tasks = Object.values(appData.tasks || {}).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const list = document.getElementById('assign-list');
+  const tasks    = Object.values(appData.tasks).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const list     = document.getElementById('assign-list');
+
   let filtered = tasks;
   if (currentFilter !== 'all') {
     const person = currentFilter === 'dinesh' ? 'Dinesh' : 'Sushmi';
-    filtered = tasks.filter(t => t.items.some(i => i.assignTo === person || i.assignTo === 'Both'));
+    filtered = tasks.filter(t =>
+      t.items.some(i => i.assignTo === person || i.assignTo === 'Both')
+    );
   }
+
   if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><p>All clear!</p><span>No pending tasks</span></div>`;
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">✅</div><p>All clear!</p>
+      <span>No pending tasks${currentFilter!=='all'?' for this person':''}</span>
+    </div>`;
     return;
   }
+
   list.innerHTML = filtered.map(task => {
-    const persons = [...new Set(task.items.map(i => i.assignTo === 'Both' ? 'Both' : i.assignTo))];
-    const tagClass = persons.includes('Both') || persons.length > 1 ? 'both' : persons[0]?.toLowerCase() || 'both';
-    const tagText = tagClass === 'both' ? '👨👩 Both' : tagClass === 'dinesh' ? '👨 Dinesh' : '👩 Sushmi';
-    const itemsToShow = currentFilter !== 'all'
-      ? task.items.filter(i => i.assignTo === (currentFilter === 'dinesh' ? 'Dinesh' : 'Sushmi') || i.assignTo === 'Both')
+    const persons  = [...new Set(task.items.map(i => i.assignTo))];
+    const tagClass = (persons.includes('Both') || persons.length > 1)
+      ? 'both' : persons[0]?.toLowerCase() || 'both';
+    const tagText  = tagClass === 'both' ? '👨👩 Both'
+      : tagClass === 'dinesh' ? '👨 Dinesh' : '👩 Sushmi';
+    const showItems = currentFilter !== 'all'
+      ? task.items.filter(i => i.assignTo === (currentFilter==='dinesh'?'Dinesh':'Sushmi') || i.assignTo === 'Both')
       : task.items;
+
     return `<div class="task-card">
       <div class="task-card-header">
         <div>
-          <div class="task-card-title">${task.title || 'Task list'}</div>
+          <div class="task-card-title">${esc(task.title || 'Task list')}</div>
           <div class="task-card-meta">${task.items.length} item${task.items.length!==1?'s':''}</div>
         </div>
-        <div style="display:flex;gap:6px;align-items:center">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
           <span class="person-tag ${tagClass}">${tagText}</span>
           <span class="task-date-badge">${fmtDate(task.createdAt)}</span>
         </div>
       </div>
       <div class="task-items-list">
-        ${itemsToShow.map(item => `<div class="task-item-row">
-          <span class="item-name">🔹 ${item.name}</span>
-          <span class="item-qty">${item.qty} ${item.unit} · <b style="color:${item.assignTo==='Dinesh'?'var(--dinesh)':item.assignTo==='Sushmi'?'#c44fcc':'#27ae60'}">${item.assignTo}</b></span>
+        ${showItems.map(item => `<div class="task-item-row">
+          <span class="item-name">🔹 ${esc(item.name)}</span>
+          <span class="item-qty">${esc(item.qty)} ${esc(item.unit)} ·
+            <b style="color:${item.assignTo==='Dinesh'?'var(--dinesh)':item.assignTo==='Sushmi'?'#c44fcc':'#27ae60'}">
+              ${esc(item.assignTo)}
+            </b>
+          </span>
         </div>`).join('')}
       </div>
       <div class="task-card-actions">
-        <input type="text" class="comment-input" placeholder="💬 Optional comment..." id="comment-${task.id}">
+        <input type="text" class="comment-input"
+          placeholder="💬 Optional comment…" id="comment-${task.id}">
         <button class="btn-complete" onclick="completeTask('${task.id}')">✓ Done</button>
       </div>
     </div>`;
   }).join('');
 }
 
+// ── HISTORY ──
 function renderHistory() {
-  const hist = Object.values(appData.history || {}).sort((a,b) => new Date(b.completedAt) - new Date(a.completedAt));
+  const hist = Object.values(appData.history)
+    .sort((a,b) => new Date(b.completedAt) - new Date(a.completedAt));
   const list = document.getElementById('history-list');
+
   if (hist.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📜</div><p>No history yet</p><span>Completed tasks will appear here</span></div>`;
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📜</div><p>No history yet</p>
+      <span>Completed tasks will appear here</span>
+    </div>`;
     return;
   }
-  // Group by month
+
   const groups = {};
   hist.forEach(h => {
-    const key = new Date(h.completedAt).toLocaleDateString('en-US', { year:'numeric', month:'long' });
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(h);
+    const key = new Date(h.completedAt).toLocaleDateString('en-US',{year:'numeric',month:'long'});
+    (groups[key] = groups[key] || []).push(h);
   });
+
   list.innerHTML = Object.entries(groups).map(([month, items]) => `
     <div class="history-month-group">
-      <div class="history-month-label">📅 ${month} <span style="color:var(--coral);margin-left:6px">${items.length}</span></div>
-      ${items.map(t => `<div class="history-card">
-        <div class="history-card-header">
-          <div class="history-card-title">${t.title || 'Task list'}</div>
-          <span class="completed-badge">✅ Done</span>
-        </div>
-        <div class="history-items">
-          ${t.items.map(i => `<span class="history-item-chip">🔹 ${i.name} · ${i.qty} ${i.unit}</span>`).join('')}
-        </div>
-        <div class="history-meta">
-          ${[...new Set(t.items.map(i=>i.assignTo))].map(p=>`<span class="person-tag ${p==='Dinesh'?'dinesh':p==='Sushmi'?'sushmi':'both'}">${p==='Dinesh'?'👨':'p'==='Sushmi'?'👩':'👨👩'} ${p}</span>`).join('')}
-          <span style="font-size:12px;color:var(--muted);margin-left:auto">${fmtDate(t.completedAt)}</span>
-        </div>
-        ${t.comment ? `<div class="history-comment">💬 "${t.comment}"</div>` : ''}
-      </div>`).join('')}
-    </div>
-  `).join('');
+      <div class="history-month-label">📅 ${month}
+        <span style="color:var(--coral);margin-left:6px">${items.length}</span>
+      </div>
+      ${items.map(t => {
+        const persons = [...new Set(t.items.map(i=>i.assignTo))];
+        return `<div class="history-card">
+          <div class="history-card-header">
+            <div class="history-card-title">${esc(t.title||'Task list')}</div>
+            <span class="completed-badge">✅ Done</span>
+          </div>
+          <div class="history-items">
+            ${t.items.map(i=>`<span class="history-item-chip">🔹 ${esc(i.name)} · ${esc(i.qty)} ${esc(i.unit)}</span>`).join('')}
+          </div>
+          <div class="history-meta">
+            ${persons.map(p=>{
+              const cls  = p==='Dinesh'?'dinesh':p==='Sushmi'?'sushmi':'both';
+              const icon = p==='Dinesh'?'👨':p==='Sushmi'?'👩':'👨👩';
+              return `<span class="person-tag ${cls}">${icon} ${esc(p)}</span>`;
+            }).join('')}
+            <span style="font-size:12px;color:var(--muted);margin-left:auto">${fmtDate(t.completedAt)}</span>
+          </div>
+          ${t.comment ? `<div class="history-comment">💬 "${esc(t.comment)}"</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>`).join('');
 }
 
+// ── STATS ──
 function renderStats() {
-  const tasks = Object.values(appData.tasks || {});
-  const hist = Object.values(appData.history || {});
-  const all = [...tasks, ...hist];
-  document.getElementById('st-total').textContent = all.length;
+  const tasks = Object.values(appData.tasks);
+  const hist  = Object.values(appData.history);
+  const all   = [...tasks, ...hist];
+
+  document.getElementById('st-total').textContent    = all.length;
   document.getElementById('st-complete').textContent = hist.length;
 
-  // Person distribution (by tasks completed)
-  const dCount = hist.filter(t => t.items.some(i => i.assignTo === 'Dinesh' || i.assignTo === 'Both')).length;
-  const sCount = hist.filter(t => t.items.some(i => i.assignTo === 'Sushmi' || i.assignTo === 'Both')).length;
-  const total = dCount + sCount || 1;
-  document.getElementById('bar-dinesh').style.width = (dCount/total*100) + '%';
-  document.getElementById('bar-sushmi').style.width = (sCount/total*100) + '%';
-  document.getElementById('val-dinesh').textContent = dCount;
-  document.getElementById('val-sushmi').textContent = sCount;
+  const dCount = hist.filter(t=>t.items.some(i=>i.assignTo==='Dinesh'||i.assignTo==='Both')).length;
+  const sCount = hist.filter(t=>t.items.some(i=>i.assignTo==='Sushmi'||i.assignTo==='Both')).length;
+  const total  = dCount + sCount || 1;
+  document.getElementById('bar-dinesh').style.width  = (dCount/total*100) + '%';
+  document.getElementById('bar-sushmi').style.width  = (sCount/total*100) + '%';
+  document.getElementById('val-dinesh').textContent  = dCount;
+  document.getElementById('val-sushmi').textContent  = sCount;
 
-  // Day chart
   const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const dayCounts = [0,0,0,0,0,0,0];
-  hist.forEach(t => { dayCounts[new Date(t.completedAt).getDay()]++; });
+  hist.forEach(t => dayCounts[new Date(t.completedAt).getDay()]++);
   const maxDay = Math.max(...dayCounts, 1);
   const colors = ['#FF6B6B','#4ECDC4','#667eea','#f093fb','#FFE66D','#ff8e53','#a8dadc'];
-  document.getElementById('day-chart').innerHTML = dayCounts.map((cnt, i) => `
+  document.getElementById('day-chart').innerHTML = dayCounts.map((cnt,i) => `
     <div class="chart-bar-row">
       <span class="chart-bar-label">${dayNames[i]}</span>
       <div class="chart-bar-track">
         <div class="chart-bar-fill" style="width:${cnt/maxDay*100}%;background:${colors[i]}">
-          ${cnt > 0 ? `<span>${cnt}</span>` : ''}
+          ${cnt>0?`<span>${cnt}</span>`:''}
         </div>
       </div>
     </div>`).join('');
 
-  // Insights
-  const insights = [];
+  const insEl = document.getElementById('insights-container');
   if (hist.length === 0) {
-    document.getElementById('insights-container').innerHTML = `<div class="empty-state"><div class="empty-icon">🔮</div><p>No insights yet</p><span>Complete some tasks to see insights!</span></div>`;
+    insEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🔮</div>
+      <p>No insights yet</p><span>Complete some tasks to see insights!</span></div>`;
     return;
   }
-  if (dCount > sCount) insights.push({icon:'💪', title:`Dinesh is on fire!`, text:`Dinesh has completed ${dCount} tasks vs Sushmi's ${sCount}`});
-  else if (sCount > dCount) insights.push({icon:'⭐', title:`Sushmi is leading!`, text:`Sushmi has completed ${sCount} tasks vs Dinesh's ${dCount}`});
-  else insights.push({icon:'🤝', title:`Perfect teamwork!`, text:`Both completed equal tasks — great balance!`});
+
+  const insights = [];
+  if      (dCount > sCount) insights.push({icon:'💪',title:'Dinesh is on fire!',        text:`${dCount} tasks done vs Sushmi's ${sCount}`});
+  else if (sCount > dCount) insights.push({icon:'⭐',title:'Sushmi is leading!',         text:`${sCount} tasks done vs Dinesh's ${dCount}`});
+  else                      insights.push({icon:'🤝',title:'Perfect teamwork!',          text:'Both completed equal tasks — great balance!'});
 
   const busyDay = dayCounts.indexOf(Math.max(...dayCounts));
-  if (dayCounts[busyDay] > 0) insights.push({icon:'📅', title:`Busiest day: ${dayNames[busyDay]}`, text:`Most tasks get done on ${dayNames[busyDay]}s`});
+  if (dayCounts[busyDay]>0) insights.push({icon:'📅',title:`Busiest day: ${dayNames[busyDay]}`,text:`Most tasks completed on ${dayNames[busyDay]}s`});
 
-  const avgItems = hist.length > 0 ? (hist.reduce((s,t) => s + t.items.length, 0) / hist.length).toFixed(1) : 0;
-  insights.push({icon:'📦', title:`Avg ${avgItems} items per task`, text:`Your task lists are nicely sized`});
+  const avgItems = (hist.reduce((s,t)=>s+t.items.length,0)/hist.length).toFixed(1);
+  insights.push({icon:'📦',title:`Avg ${avgItems} items per task`,text:'Your task lists are nicely sized'});
 
   const streak = getStreak(hist);
-  if (streak > 1) insights.push({icon:'🔥', title:`${streak}-day streak!`, text:`You've completed tasks ${streak} days in a row`});
+  if (streak>1) insights.push({icon:'🔥',title:`${streak}-day streak!`,text:`Tasks completed ${streak} days in a row`});
 
-  document.getElementById('insights-container').innerHTML = insights.map(ins => `
+  insEl.innerHTML = insights.map(ins => `
     <div class="insight-card">
       <div class="insight-icon">${ins.icon}</div>
       <div class="insight-text"><strong>${ins.title}</strong><span>${ins.text}</span></div>
@@ -958,34 +1032,30 @@ function renderStats() {
 }
 
 function getStreak(hist) {
-  const days = new Set(hist.map(t => new Date(t.completedAt).toDateString()));
-  let streak = 0, d = new Date();
-  while (days.has(d.toDateString())) { streak++; d.setDate(d.getDate()-1); }
-  return streak;
-}
-
-// ── COMPLETE TASK ──
-function completeTask(taskId) {
-  const comment = document.getElementById('comment-' + taskId)?.value || '';
-  window._completeTask(taskId, comment);
-  showToast('🎉 Task completed!');
+  const days = new Set(hist.map(t=>new Date(t.completedAt).toDateString()));
+  let s=0, d=new Date();
+  while(days.has(d.toDateString())){s++;d.setDate(d.getDate()-1);}
+  return s;
 }
 
 // ── UTILS ──
 function fmtDate(iso) {
   if (!iso) return '';
-  const d = new Date(iso);
-  const now = new Date();
-  const diff = Math.floor((now - d) / 86400000);
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Yesterday';
-  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  const d    = new Date(iso);
+  const diff = Math.floor((Date.now()-d)/86400000);
+  if (diff===0) return 'Today';
+  if (diff===1) return 'Yesterday';
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function updateBadge() {
-  const count = Object.keys(appData.tasks || {}).length;
+  const count = Object.keys(appData.tasks).length;
   const badge = document.getElementById('assign-badge');
-  badge.textContent = count;
+  badge.textContent   = count;
   badge.style.display = count > 0 ? 'flex' : 'none';
 }
 
@@ -996,46 +1066,14 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// Make appData global for firebase module
-window.appData = appData;
-window._saveTask = window._saveTask || async function(obj) {
-  const id = 'task_' + Date.now();
-  obj.id = id;
-  appData.tasks[id] = obj;
-  window.appData = appData;
-  saveLocal();
-  renderAll();
-};
-window._completeTask = window._completeTask || async function(taskId, comment) {
-  const task = appData.tasks[taskId];
-  if (!task) return;
-  task.completedAt = new Date().toISOString();
-  task.comment = comment;
-  task.status = 'done';
-  const histId = 'hist_' + Date.now();
-  appData.history[histId] = task;
-  delete appData.tasks[taskId];
-  window.appData = appData;
-  saveLocal();
-  renderAll();
-};
-
-function saveLocal() {
-  try { localStorage.setItem('happyfamily', JSON.stringify(appData)); } catch(e) {}
-}
-
-function loadLocal() {
-  try { const s = localStorage.getItem('happyfamily'); if (s) { const d = JSON.parse(s); appData.tasks = d.tasks||{}; appData.history = d.history||{}; window.appData = appData; } } catch(e) {}
-  renderAll();
-}
-
-// INIT
+// ── INIT ──
 updateGreeting();
 loadLocal();
+renderAll();
+initFirebase(); // connects to Firebase if keys are configured above
 
-// Register Service Worker for PWA
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 </script>
 </body>
