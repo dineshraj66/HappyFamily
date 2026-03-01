@@ -571,7 +571,7 @@
 // │  Leave as-is to use local storage only (single device)         │
 // └─────────────────────────────────────────────────────────────────┘
 const FIREBASE = {
-   apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
+  apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
   authDomain: "happyfamily-e4f68.firebaseapp.com",
   projectId: "happyfamily-e4f68",
   storageBucket: "happyfamily-e4f68.firebasestorage.app",
@@ -648,22 +648,14 @@ function loadLocal() {
 }
 
 // Push full state to Firebase (debounced helper)
-function syncFirebase() {
-  if (!fbConnected || !window._fb) return;
-  window._fb.set(window._fb.ref(fbDatabase, 'happyfamily'), {
-    tasks  : appData.tasks,
-    history: appData.history
-  }).catch(()=>{});
-}
-
 // ── TASK OPERATIONS ──
 function saveTask(taskObj) {
   const id = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
   taskObj.id = id;
   appData.tasks[id] = taskObj;
-  saveLocal();
-  syncFirebase();
-  renderAll();
+  saveLocal();            // save to local cache immediately
+  renderAll();            // update UI immediately (no waiting for Firebase)
+  fbWriteTask(id, taskObj); // push just this one record to Firebase
 }
 
 function completeTask(taskId) {
@@ -676,9 +668,10 @@ function completeTask(taskId) {
   const histId  = 'hist_' + Date.now();
   appData.history[histId] = JSON.parse(JSON.stringify(task));
   delete appData.tasks[taskId];
-  saveLocal();
-  syncFirebase();
-  renderAll();
+  saveLocal();                             // update local cache
+  renderAll();                             // update UI immediately
+  fbWriteHistory(histId, appData.history[histId]); // write history record
+  fbDeleteTask(taskId);                    // remove from tasks
   showToast('🎉 Task completed!');
 }
 
