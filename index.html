@@ -45,7 +45,7 @@
     overflow-x: hidden;
   }
 
-  /* ── HEADER ── */
+  /* -- HEADER -- */
   .app-header {
     background: linear-gradient(135deg, var(--coral) 0%, #ff8e53 100%);
     color: white;
@@ -74,7 +74,7 @@
   }
   .header-icon-btn:hover { background: rgba(255,255,255,0.35); }
 
-  /* ── TABS ── */
+  /* -- TABS -- */
   .tab-bar {
     position: sticky; top: 0; z-index: 100;
     background: var(--card);
@@ -108,12 +108,12 @@
     padding: 0 4px;
   }
 
-  /* ── PAGES ── */
+  /* -- PAGES -- */
   .page { display: none; padding: 20px; min-height: calc(100vh - 140px); animation: fadeIn 0.3s ease; }
   .page.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* ── FAB ── */
+  /* -- FAB -- */
   .fab {
     position: fixed; bottom: 90px; right: 20px;
     width: 60px; height: 60px; border-radius: 50%;
@@ -128,7 +128,7 @@
   .fab:hover { transform: scale(1.08); box-shadow: 0 8px 32px rgba(255,107,107,0.55); }
   .fab:active { transform: scale(0.95); }
 
-  /* ── MODAL ── */
+  /* -- MODAL -- */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.5); z-index: 200;
@@ -161,7 +161,7 @@
   .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
   .modal-footer { padding: 12px 20px 24px; border-top: 1px solid var(--border); }
 
-  /* ── ITEMS TABLE ── */
+  /* -- ITEMS TABLE -- */
   .items-table-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1.5px solid var(--border); }
   .items-table { width: 100%; border-collapse: collapse; min-width: 500px; }
   .items-table th {
@@ -214,7 +214,7 @@
   .person-chip.dinesh.active { background: var(--dinesh); border-color: var(--dinesh); color: white; }
   .person-chip.sushmi.active { background: var(--sushmi); border-color: var(--sushmi); color: white; }
 
-  /* ── BUTTONS ── */
+  /* -- BUTTONS -- */
   .btn-primary {
     width: 100%; padding: 15px;
     background: linear-gradient(135deg, var(--coral), #ff8e53);
@@ -225,7 +225,7 @@
   .btn-primary:hover { opacity: 0.93; }
   .btn-primary:active { transform: scale(0.98); }
 
-  /* ── HOME PAGE ── */
+  /* -- HOME PAGE -- */
   .greeting-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: var(--radius); padding: 20px 24px;
@@ -266,7 +266,7 @@
   .empty-state p { font-size: 15px; font-weight: 700; }
   .empty-state span { font-size: 13px; }
 
-  /* ── ASSIGN PAGE ── */
+  /* -- ASSIGN PAGE -- */
   .filter-row { display: flex; gap: 8px; margin-bottom: 16px; }
   .filter-chip {
     padding: 8px 20px; border-radius: 20px;
@@ -318,7 +318,7 @@
     border-radius: 20px; white-space: nowrap;
   }
 
-  /* ── HISTORY PAGE ── */
+  /* -- HISTORY PAGE -- */
   .history-month-group { margin-bottom: 24px; }
   .history-month-label { font-size: 13px; font-weight: 800; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
   .history-card {
@@ -333,7 +333,7 @@
   .history-comment { margin-top: 8px; font-size: 12px; color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 4px; }
   .history-meta { margin-top: 8px; display: flex; align-items: center; gap: 8px; }
 
-  /* ── STATS PAGE ── */
+  /* -- STATS PAGE -- */
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
   .stat-card {
     background: var(--card); border-radius: var(--radius-sm);
@@ -563,20 +563,20 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 <script>
-// ════════════════════════════════════════════════════════
-//  HAPPYFAMILY — SINGLE SCRIPT, REAL-TIME FIREBASE SYNC
-// ════════════════════════════════════════════════════════
+// ========================================================
+//  HAPPYFAMILY - SINGLE SCRIPT, REAL-TIME FIREBASE SYNC
+// ========================================================
 
-// ┌──────────────────────────────────────────────────────────┐
-// │  🔥 FIREBASE CONFIG — PASTE YOUR VALUES HERE            │
-// │                                                          │
-// │  Steps:                                                  │
-// │  1. https://console.firebase.google.com                 │
-// │  2. Create project → HappyFamily                        │
-// │  3. Build → Realtime Database → Create (test mode)      │
-// │  4. Project Settings ⚙️ → Your apps → Add Web app </>   │
-// │  5. Copy values from the firebaseConfig shown there     │
-// └──────────────────────────────────────────────────────────┘
+// +----------------------------------------------------------+
+// |  FIREBASE CONFIG - PASTE YOUR VALUES HERE               |
+// |                                                          |
+// |  Steps:                                                  |
+// |  1. https://console.firebase.google.com                 |
+// |  2. Create project > HappyFamily                        |
+// |  3. Build > Realtime Database > Create (test mode)      |
+// |  4. Project Settings > Your apps > Add Web app </>      |
+// |  5. Copy values from the firebaseConfig shown there     |
+// +----------------------------------------------------------+
 const FIREBASE = {
   apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
   authDomain: "happyfamily-e4f68.firebaseapp.com",
@@ -587,33 +587,32 @@ const FIREBASE = {
   const FIREBASE_DB_URL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
 };
 
-// ⚠️ PASTE YOUR REALTIME DATABASE URL HERE
-// Find it in: Firebase Console → Realtime Database → Data tab (the URL at the top)
-// Format: https://YOUR-PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app
-// For your project it is: https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
+// PASTE YOUR REALTIME DATABASE URL BELOW
+// Find it: Firebase Console > Realtime Database > Data tab (URL shown at the top)
+// Your project URL: https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
 const FIREBASE_DB_URL = "PASTE_YOUR_DATABASE_URL_HERE";
-// ──────────────────────────────────────────────────────────
+// ----------------------------------------------------------
 
-// ── SINGLE SOURCE OF TRUTH ──
+// -- SINGLE SOURCE OF TRUTH --
 const appData = { tasks: {}, history: {} };
 
-// ── FIREBASE STATE ──
+// -- FIREBASE STATE --
 let _db       = null;   // firebase database instance
 let _ref      = null;   // firebase ref function
 let _set      = null;   // firebase set function
 let _remove   = null;   // firebase remove function
 let fbReady   = false;  // true once listener is active
 
-// ── SYNC STATUS UI ──
+// -- SYNC STATUS UI --
 function setSyncStatus(state) {
   // state: 'connecting' | 'live' | 'local' | 'error'
   const bar = document.getElementById('sync-bar');
   if (!bar) return;
   const cfg = {
-    connecting : { bg:'#667eea', text:'⏳ Connecting to Firebase…' },
-    live       : { bg:'#27ae60', text:'🟢 Live sync active — all devices in sync' },
-    local      : { bg:'#636e72', text:'💾 Offline mode — data saved locally' },
-    error      : { bg:'#e17055', text:'⚠️ Firebase error — using local storage' },
+    connecting : { bg:'#667eea', text:'⏳ Connecting to Firebase...' },
+    live       : { bg:'#27ae60', text:'🟢 Live sync active - all devices in sync' },
+    local      : { bg:'#636e72', text:'💾 Offline mode - data saved locally' },
+    error      : { bg:'#e17055', text:'⚠️ Firebase error - using local storage' },
   };
   const c = cfg[state] || cfg.local;
   bar.style.background = c.bg;
@@ -622,7 +621,7 @@ function setSyncStatus(state) {
   if (state === 'live') setTimeout(() => { bar.style.display = 'none'; }, 3000);
 }
 
-// ── FIREBASE INIT ──
+// -- FIREBASE INIT --
 function initFirebase() {
   if (FIREBASE.apiKey.startsWith('PASTE_')) {
     setSyncStatus('local');
@@ -635,15 +634,15 @@ function initFirebase() {
   ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onValue }]) => {
 
     const fbApp = initializeApp(FIREBASE);
-    // Pass the database URL explicitly — required for non-US regional databases
+    // Pass the database URL explicitly - required for non-US regional databases
     _db     = getDatabase(fbApp, FIREBASE_DB_URL);
     _ref    = ref;
     _set    = set;
     _remove = remove;
 
-    // ── REAL-TIME LISTENER ──
+    // -- REAL-TIME LISTENER --
     // This fires immediately with current data, then again on EVERY change
-    // from ANY device — web or mobile. This is the only way data flows IN.
+    // from ANY device - web or mobile. This is the only way data flows IN.
     onValue(_ref(_db, 'happyfamily'), (snap) => {
       const d = snap.val() || {};
       appData.tasks   = d.tasks   || {};
@@ -665,8 +664,8 @@ function initFirebase() {
   });
 }
 
-// ── FIREBASE WRITE HELPERS ──
-// Each writes ONLY its own record — never overwrites sibling data
+// -- FIREBASE WRITE HELPERS --
+// Each writes ONLY its own record - never overwrites sibling data
 function fbSaveTask(id, obj) {
   if (!fbReady) return;
   _set(_ref(_db, 'happyfamily/tasks/' + id), obj).catch(e => console.error('fbSaveTask:', e));
@@ -680,7 +679,7 @@ function fbSaveHistory(id, obj) {
   _set(_ref(_db, 'happyfamily/history/' + id), obj).catch(e => console.error('fbSaveHistory:', e));
 }
 
-// ── LOCAL STORAGE ──
+// -- LOCAL STORAGE --
 function saveLocal() {
   try { localStorage.setItem('hf_data', JSON.stringify(appData)); } catch(e) {}
 }
@@ -691,14 +690,14 @@ function loadLocal() {
   } catch(e) {}
 }
 
-// ── TASK OPERATIONS ──
+// -- TASK OPERATIONS --
 function saveTask(taskObj) {
   const id   = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
   taskObj.id = id;
   appData.tasks[id] = taskObj;
   saveLocal();
   renderAll();
-  fbSaveTask(id, taskObj);   // push to Firebase → triggers onValue on all other devices
+  fbSaveTask(id, taskObj);   // push to Firebase -> triggers onValue on all other devices
 }
 
 function completeTask(taskId) {
@@ -719,12 +718,12 @@ function completeTask(taskId) {
   showToast('🎉 Task completed!');
 }
 
-// ── UI STATE ──
+// -- UI STATE --
 let currentFilter = 'all';
 let globalAssign  = '';
 let rowCount      = 0;
 
-// ── GREETING ──
+// -- GREETING --
 function updateGreeting() {
   const h    = new Date().getHours();
   const idx  = h < 12 ? 0 : h < 17 ? 1 : h < 21 ? 2 : 3;
@@ -736,7 +735,7 @@ function updateGreeting() {
     new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
 }
 
-// ── PAGE NAV ──
+// -- PAGE NAV --
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
@@ -745,7 +744,7 @@ function showPage(name) {
   if (name === 'stats') renderStats();
 }
 
-// ── MODAL ──
+// -- MODAL --
 function openModal() {
   document.getElementById('modal-overlay').classList.add('open');
   document.getElementById('items-tbody').innerHTML = '';
@@ -757,7 +756,7 @@ function openModal() {
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
 
-// ── GLOBAL ASSIGN ──
+// -- GLOBAL ASSIGN --
 function setGlobalAssign(val) {
   globalAssign = val;
   updateGlobalChips();
@@ -769,7 +768,7 @@ function updateGlobalChips() {
   document.getElementById('global-none').classList.toggle('active',   globalAssign === '');
 }
 
-// ── ADD / REMOVE ROWS ──
+// -- ADD / REMOVE ROWS --
 function addItemRow() {
   rowCount++;
   const tbody = document.getElementById('items-tbody');
@@ -806,7 +805,7 @@ function removeRow(btn) {
   rowCount = document.querySelectorAll('#items-tbody tr').length;
 }
 
-// ── SUBMIT TASKS ──
+// -- SUBMIT TASKS --
 function submitTasks() {
   const rows  = document.querySelectorAll('#items-tbody tr');
   const items = [];
@@ -831,7 +830,7 @@ function submitTasks() {
   if (items.length === 0) { showToast('⚠️ Add at least one item');  return; }
 
   const allNames = items.map(i => i.name).join(', ');
-  const title    = allNames.length > 42 ? allNames.substring(0, 42) + '…' : allNames;
+  const title    = allNames.length > 42 ? allNames.substring(0, 42) + '...' : allNames;
 
   saveTask({
     items,
@@ -845,7 +844,7 @@ function submitTasks() {
   showPage('assign');
 }
 
-// ── FILTER ──
+// -- FILTER --
 function setFilter(f) {
   currentFilter = f;
   ['all','dinesh','sushmi'].forEach(x => {
@@ -855,7 +854,7 @@ function setFilter(f) {
   renderAssign();
 }
 
-// ── RENDER ALL ──
+// -- RENDER ALL --
 function renderAll() {
   renderHome();
   renderAssign();
@@ -863,7 +862,7 @@ function renderAll() {
   updateBadge();
 }
 
-// ── HOME ──
+// -- HOME --
 function renderHome() {
   const tasks = Object.values(appData.tasks);
   const hist  = Object.values(appData.history);
@@ -900,7 +899,7 @@ function renderHome() {
   }).join('');
 }
 
-// ── ASSIGN ──
+// -- ASSIGN --
 function renderAssign() {
   const tasks    = Object.values(appData.tasks).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
   const list     = document.getElementById('assign-list');
@@ -954,14 +953,14 @@ function renderAssign() {
       </div>
       <div class="task-card-actions">
         <input type="text" class="comment-input"
-          placeholder="💬 Optional comment…" id="comment-${task.id}">
+          placeholder="💬 Optional comment..." id="comment-${task.id}">
         <button class="btn-complete" onclick="completeTask('${task.id}')">✓ Done</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── HISTORY ──
+// -- HISTORY --
 function renderHistory() {
   const hist = Object.values(appData.history)
     .sort((a,b) => new Date(b.completedAt) - new Date(a.completedAt));
@@ -1010,7 +1009,7 @@ function renderHistory() {
     </div>`).join('');
 }
 
-// ── STATS ──
+// -- STATS --
 function renderStats() {
   const tasks = Object.values(appData.tasks);
   const hist  = Object.values(appData.history);
@@ -1052,7 +1051,7 @@ function renderStats() {
   const insights = [];
   if      (dCount > sCount) insights.push({icon:'💪',title:'Dinesh is on fire!',        text:`${dCount} tasks done vs Sushmi's ${sCount}`});
   else if (sCount > dCount) insights.push({icon:'⭐',title:'Sushmi is leading!',         text:`${sCount} tasks done vs Dinesh's ${dCount}`});
-  else                      insights.push({icon:'🤝',title:'Perfect teamwork!',          text:'Both completed equal tasks — great balance!'});
+  else                      insights.push({icon:'🤝',title:'Perfect teamwork!',          text:'Both completed equal tasks - great balance!'});
 
   const busyDay = dayCounts.indexOf(Math.max(...dayCounts));
   if (dayCounts[busyDay]>0) insights.push({icon:'📅',title:`Busiest day: ${dayNames[busyDay]}`,text:`Most tasks completed on ${dayNames[busyDay]}s`});
@@ -1077,7 +1076,7 @@ function getStreak(hist) {
   return s;
 }
 
-// ── UTILS ──
+// -- UTILS --
 function fmtDate(iso) {
   if (!iso) return '';
   const d    = new Date(iso);
@@ -1105,7 +1104,7 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// ── INIT ──
+// -- INIT --
 updateGreeting();
 loadLocal();
 renderAll();
