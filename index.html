@@ -570,7 +570,7 @@
 // ==============================================================
 // STEP 1: Paste each value from Firebase Project Settings below
 // ==============================================================
-const FIREBASE_API_KEY        = "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk";
+  const FIREBASE_API_KEY        = "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk";
 const FIREBASE_AUTH_DOMAIN    = "happyfamily-e4f68.firebaseapp.com";
 const FIREBASE_PROJECT_ID     = "happyfamily-e4f68";
 const FIREBASE_STORAGE_BUCKET = "happyfamily-e4f68.firebasestorage.app";
@@ -1114,7 +1114,14 @@ renderAll();
 initFirebase(); // connects to Firebase if keys are configured above
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  // Listen for SW telling us caches are cleared — then reload to get fresh files
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data === 'reload') window.location.reload(true);
+  });
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // If a new SW is waiting, activate it immediately
+    if (reg.waiting) reg.waiting.postMessage('skipWaiting');
+  });
 }
 </script>
 </body>
