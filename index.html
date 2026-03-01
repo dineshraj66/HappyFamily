@@ -578,15 +578,20 @@
 // │  5. Copy values from the firebaseConfig shown there     │
 // └──────────────────────────────────────────────────────────┘
 const FIREBASE = {
-   apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
+  apiKey: "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
   authDomain: "happyfamily-e4f68.firebaseapp.com",
-  databaseURL       : "PASTE_YOUR_databaseURL_HERE",
   projectId: "happyfamily-e4f68",
-  storageBucket: "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app",
+  storageBucket: "happyfamily-e4f68.firebasestorage.app",
   messagingSenderId: "740546226739",
   appId: "1:740546226739:web:8247b42ed7b059fe5a9146",
-  measurementId: "G-H33FZ6MZPW"
+  const FIREBASE_DB_URL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
 };
+
+// ⚠️ PASTE YOUR REALTIME DATABASE URL HERE
+// Find it in: Firebase Console → Realtime Database → Data tab (the URL at the top)
+// Format: https://YOUR-PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app
+// For your project it is: https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
+const FIREBASE_DB_URL = "PASTE_YOUR_DATABASE_URL_HERE";
 // ──────────────────────────────────────────────────────────
 
 // ── SINGLE SOURCE OF TRUTH ──
@@ -629,7 +634,9 @@ function initFirebase() {
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js')
   ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onValue }]) => {
 
-    _db     = getDatabase(initializeApp(FIREBASE));
+    const fbApp = initializeApp(FIREBASE);
+    // Pass the database URL explicitly — required for non-US regional databases
+    _db     = getDatabase(fbApp, FIREBASE_DB_URL);
     _ref    = ref;
     _set    = set;
     _remove = remove;
