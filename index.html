@@ -2,1405 +2,1692 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#FF6B6B">
-
-<!-- Android PWA -->
-<meta name="mobile-web-app-capable" content="yes">
-
-<!-- iOS PWA - required for Add to Home Screen -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="HappyFamily">
-
-<!-- iOS icons - multiple sizes required -->
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="120x120" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="152x152" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="167x167" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
-
-<!-- Manifest -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Love Today</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<title>HappyFamily</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#e8526a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Love Today">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --coral: #FF6B6B;
-    --coral-dark: #e85555;
-    --teal: #4ECDC4;
-    --teal-dark: #38b2aa;
-    --yellow: #FFE66D;
-    --purple: #A8DADC;
-    --dinesh: #667eea;
-    --dinesh-light: #e8edff;
-    --sushmi: #f093fb;
-    --sushmi-light: #fde8ff;
-    --bg: #f7f3ee;
-    --card: #ffffff;
-    --text: #2d3436;
-    --muted: #636e72;
-    --border: #e8e0d8;
-    --shadow: 0 4px 20px rgba(0,0,0,0.08);
-    --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+    --rose: #e8526a;
+    --rose-dark: #c73a52;
+    --rose-light: #f9d5db;
+    --blush: #fdf0f2;
+    --cream: #fefaf8;
+    --warm-brown: #6b4c4c;
+    --text: #2d1f1f;
+    --text-soft: #8c6b6b;
+    --white: #ffffff;
+    --card: rgba(255,255,255,0.92);
+    --shadow: 0 4px 24px rgba(232,82,106,0.1);
+    --shadow-lg: 0 8px 40px rgba(232,82,106,0.18);
     --radius: 20px;
-    --radius-sm: 12px;
+    --tab-h: 70px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
   body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
     color: var(--text);
     min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
     overflow-x: hidden;
   }
 
-  /* -- HEADER -- */
-  .app-header {
-    background: linear-gradient(135deg, var(--coral) 0%, #ff8e53 100%);
-    color: white;
-    padding: 20px 20px 60px;
+  body::before {
+    content: '';
+    position: fixed;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(232,82,106,0.08) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* HEADER */
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(254,250,248,0.92);
+    backdrop-filter: blur(20px);
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid rgba(232,82,106,0.1);
+  }
+
+  .header-top {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .app-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--rose);
+    font-style: italic;
+    letter-spacing: -0.5px;
+  }
+
+  .header-btn {
+    background: var(--rose-light);
+    border: none; border-radius: 12px;
+    padding: 8px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--rose-dark);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .header-btn:hover { background: var(--rose); color: white; }
+
+  /* TABS */
+  .tab-bar {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(232,82,106,0.12);
+    display: flex; height: var(--tab-h);
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px; cursor: pointer;
+    transition: all 0.2s;
+    font-size: 10px;
+    color: #c4a0a5;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    position: relative;
+    border: none; background: none;
+  }
+
+  .tab-item .tab-icon { font-size: 20px; transition: transform 0.2s; }
+
+  .tab-item.active { color: var(--rose); }
+  .tab-item.active .tab-icon { transform: scale(1.15); }
+  .tab-item.active::after {
+    content: '';
+    position: absolute; top: 0; left: 25%; right: 25%;
+    height: 3px; background: var(--rose);
+    border-radius: 0 0 3px 3px;
+  }
+
+  /* CONTENT */
+  .content {
+    padding: 16px 16px calc(var(--tab-h) + 20px);
+    min-height: calc(100vh - 60px);
+    position: relative; z-index: 1;
+  }
+
+  .screen { display: none; animation: fadeUp 0.3s ease; }
+  .screen.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(232,82,106,0.08);
     position: relative;
     overflow: hidden;
   }
-  .app-header::before {
+
+  .card::before {
     content: '';
-    position: absolute;
-    bottom: -30px; left: 0; right: 0;
-    height: 60px;
-    background: var(--bg);
-    border-radius: 50% 50% 0 0 / 60px;
-  }
-  .header-top { display: flex; align-items: center; justify-content: space-between; }
-  .app-title { font-family: 'Pacifico', cursive; font-size: 26px; letter-spacing: 0.5px; }
-  .app-subtitle { font-size: 13px; opacity: 0.85; margin-top: 3px; }
-  .header-icons { display: flex; gap: 8px; }
-  .header-icon-btn {
-    background: rgba(255,255,255,0.2);
-    border: none; color: white; cursor: pointer;
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; transition: background 0.2s;
-  }
-  .header-icon-btn:hover { background: rgba(255,255,255,0.35); }
-
-  /* -- TABS -- */
-  .tab-bar {
-    position: sticky; top: 0; z-index: 100;
-    background: var(--card);
-    border-bottom: 2px solid var(--border);
-    display: flex;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  }
-  .tab-btn {
-    flex: 1; padding: 14px 8px 12px;
-    border: none; background: none; cursor: pointer;
-    font-family: 'Nunito', sans-serif;
-    font-size: 12px; font-weight: 700;
-    color: var(--muted);
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    transition: color 0.2s; position: relative;
-  }
-  .tab-btn .tab-icon { font-size: 20px; }
-  .tab-btn.active { color: var(--coral); }
-  .tab-btn.active::after {
-    content: '';
-    position: absolute; bottom: 0; left: 20%; right: 20%;
-    height: 3px; border-radius: 3px 3px 0 0;
-    background: var(--coral);
-  }
-  .tab-badge {
-    position: absolute; top: 8px; right: calc(50% - 18px);
-    background: var(--coral); color: white;
-    border-radius: 10px; font-size: 10px; font-weight: 800;
-    min-width: 18px; height: 18px;
-    display: flex; align-items: center; justify-content: center;
-    padding: 0 4px;
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: var(--rose);
+    border-radius: 0 2px 2px 0;
   }
 
-  /* -- PAGES -- */
-  .page { display: none; padding: 20px; min-height: calc(100vh - 140px); animation: fadeIn 0.3s ease; }
-  .page.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* -- FAB -- */
-  .fab {
-    position: fixed; bottom: 90px; right: 20px;
-    width: 60px; height: 60px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--coral), #ff8e53);
-    color: white; border: none; cursor: pointer;
-    font-size: 28px; font-weight: 300;
-    box-shadow: 0 6px 24px rgba(255,107,107,0.45);
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.2s, box-shadow 0.2s;
-    z-index: 50;
-  }
-  .fab:hover { transform: scale(1.08); box-shadow: 0 8px 32px rgba(255,107,107,0.55); }
-  .fab:active { transform: scale(0.95); }
-
-  /* -- MODAL -- */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5); z-index: 200;
-    align-items: flex-end; justify-content: center;
-  }
-  .modal-overlay.open { display: flex; animation: overlayIn 0.25s ease; }
-  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
-  .modal {
-    background: var(--card); border-radius: 28px 28px 0 0;
-    width: 100%; max-width: 600px;
-    max-height: 92vh; display: flex; flex-direction: column;
-    animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-handle {
-    width: 40px; height: 4px; background: var(--border);
-    border-radius: 2px; margin: 12px auto 0;
-  }
-  .modal-header {
-    padding: 16px 20px 12px;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-  }
-  .modal-title { font-size: 18px; font-weight: 800; }
-  .modal-close {
-    background: var(--border); border: none; cursor: pointer;
-    width: 30px; height: 30px; border-radius: 50%;
-    font-size: 16px; display: flex; align-items: center; justify-content: center;
-  }
-  .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
-  .modal-footer { padding: 12px 20px 24px; border-top: 1px solid var(--border); }
-
-  /* -- ITEMS TABLE -- */
-  .items-table-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1.5px solid var(--border); }
-  .items-table { width: 100%; border-collapse: collapse; min-width: 500px; }
-  .items-table th {
-    background: #faf7f4; padding: 10px 12px;
-    font-size: 11px; font-weight: 800; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 0.5px;
-    border-bottom: 1.5px solid var(--border); text-align: left;
-  }
-  .items-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
-  .items-table tr:last-child td { border-bottom: none; }
-  .items-table input, .items-table select {
-    width: 100%; border: 1.5px solid var(--border);
-    border-radius: 8px; padding: 7px 9px;
-    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600;
-    background: white; outline: none;
-    transition: border-color 0.2s;
-  }
-  .items-table input:focus, .items-table select:focus { border-color: var(--coral); }
-  .sno-cell { font-size: 13px; font-weight: 800; color: var(--muted); text-align: center; width: 36px; }
-  .remove-row-btn {
-    background: none; border: none; cursor: pointer;
-    color: #ccc; font-size: 18px; transition: color 0.2s;
-    padding: 4px; border-radius: 6px;
-  }
-  .remove-row-btn:hover { color: var(--coral); background: #fff0f0; }
-
-  .btn-add-row {
-    margin-top: 12px; width: 100%;
-    border: 2px dashed var(--border); background: none;
-    border-radius: var(--radius-sm); padding: 10px;
-    font-family: 'Nunito', sans-serif; font-size: 14px;
-    font-weight: 700; color: var(--muted); cursor: pointer;
-    transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .btn-add-row:hover { border-color: var(--coral); color: var(--coral); background: #fff5f5; }
-
-  /* Global assign toggle in modal */
-  .assign-toggle-row {
-    display: flex; align-items: center; gap: 10px;
-    margin: 14px 0 6px;
-    background: var(--bg); border-radius: var(--radius-sm); padding: 10px 14px;
-  }
-  .assign-toggle-row span { font-size: 13px; font-weight: 700; color: var(--muted); margin-right: 4px; }
-  .person-chip {
-    padding: 6px 16px; border-radius: 20px;
-    border: 2px solid var(--border); background: white;
-    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .person-chip.dinesh.active { background: var(--dinesh); border-color: var(--dinesh); color: white; }
-  .person-chip.sushmi.active { background: var(--sushmi); border-color: var(--sushmi); color: white; }
-
-  /* -- BUTTONS -- */
-  .btn-primary {
-    width: 100%; padding: 15px;
-    background: linear-gradient(135deg, var(--coral), #ff8e53);
-    color: white; border: none; border-radius: var(--radius-sm);
-    font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800;
-    cursor: pointer; transition: opacity 0.2s, transform 0.1s;
-  }
-  .btn-primary:hover { opacity: 0.93; }
-  .btn-primary:active { transform: scale(0.98); }
-
-  /* -- HOME PAGE -- */
-  .greeting-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: var(--radius); padding: 20px 24px;
-    color: white; margin-bottom: 20px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .greeting-card h2 { font-size: 20px; font-weight: 900; }
-  .greeting-card p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
-  .greeting-emoji { font-size: 48px; }
-  .section-title { font-size: 14px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-  .quick-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-  .quick-stat-card {
-    background: var(--card); border-radius: var(--radius-sm);
-    padding: 16px; box-shadow: var(--shadow);
-    text-align: center;
-  }
-  .quick-stat-card .stat-num { font-size: 28px; font-weight: 900; }
-  .quick-stat-card .stat-label { font-size: 12px; color: var(--muted); font-weight: 700; margin-top: 2px; }
-  .recent-list { display: flex; flex-direction: column; gap: 10px; }
-  .recent-item {
-    background: var(--card); border-radius: var(--radius-sm);
-    padding: 14px 16px; box-shadow: var(--shadow);
-    display: flex; align-items: center; gap: 12px;
-  }
-  .recent-item-icon { font-size: 22px; }
-  .recent-item-info { flex: 1; }
-  .recent-item-info strong { font-size: 14px; display: block; }
-  .recent-item-info span { font-size: 12px; color: var(--muted); }
-  .person-tag {
-    font-size: 11px; font-weight: 800; padding: 3px 10px;
+  .card-category {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--rose-light);
+    color: var(--rose-dark);
     border-radius: 20px;
-  }
-  .person-tag.dinesh { background: var(--dinesh-light); color: var(--dinesh); }
-  .person-tag.sushmi { background: var(--sushmi-light); color: #c44fcc; }
-  .person-tag.both { background: #e8f7e8; color: #27ae60; }
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
-  .empty-state .empty-icon { font-size: 56px; margin-bottom: 12px; }
-  .empty-state p { font-size: 15px; font-weight: 700; }
-  .empty-state span { font-size: 13px; }
-
-  /* -- ASSIGN PAGE -- */
-  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; }
-  .filter-chip {
-    padding: 8px 20px; border-radius: 20px;
-    border: 2px solid var(--border); background: white;
-    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .filter-chip.active-all { background: var(--text); border-color: var(--text); color: white; }
-  .filter-chip.active-dinesh { background: var(--dinesh); border-color: var(--dinesh); color: white; }
-  .filter-chip.active-sushmi { background: var(--sushmi); border-color: var(--sushmi); color: white; }
-  .task-card {
-    background: var(--card); border-radius: var(--radius-sm);
-    box-shadow: var(--shadow); margin-bottom: 12px;
-    overflow: hidden; transition: transform 0.2s;
-  }
-  .task-card:hover { transform: translateY(-2px); }
-  .task-card-header {
-    padding: 14px 16px 10px;
-    display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
-  }
-  .task-card-title { font-size: 15px; font-weight: 800; flex: 1; }
-  .task-card-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
-  .task-items-list { padding: 0 16px 12px; display: flex; flex-direction: column; gap: 6px; }
-  .task-item-row {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--bg); border-radius: 8px; padding: 7px 12px;
-  }
-  .task-item-row .item-name { font-size: 13px; font-weight: 700; }
-  .task-item-row .item-qty { font-size: 12px; color: var(--muted); }
-  .task-card-actions { padding: 10px 16px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-  .btn-complete {
-    flex: 1; padding: 10px;
-    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
-    color: white; border: none; border-radius: var(--radius-sm);
-    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
-    cursor: pointer; transition: opacity 0.2s;
-  }
-  .btn-complete:hover { opacity: 0.88; }
-  .comment-input {
-    flex: 2; padding: 10px 12px;
-    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600;
-    outline: none; transition: border-color 0.2s;
-  }
-  .comment-input:focus { border-color: var(--teal); }
-  .task-date-badge {
-    background: var(--yellow); color: #7a6200;
-    font-size: 11px; font-weight: 800; padding: 3px 10px;
-    border-radius: 20px; white-space: nowrap;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
   }
 
-  /* -- HISTORY PAGE -- */
-  .history-month-group { margin-bottom: 24px; }
-  .history-month-label { font-size: 13px; font-weight: 800; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
-  .history-card {
-    background: var(--card); border-radius: var(--radius-sm);
-    box-shadow: var(--shadow); margin-bottom: 10px; padding: 14px 16px;
+  .card-desc {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.4;
   }
-  .history-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .history-card-title { font-size: 14px; font-weight: 800; }
-  .completed-badge { background: #e8f7ee; color: #27ae60; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; }
-  .history-items { display: flex; flex-wrap: wrap; gap: 6px; }
-  .history-item-chip { background: var(--bg); border-radius: 20px; font-size: 12px; font-weight: 700; padding: 4px 12px; color: var(--text); }
-  .history-comment { margin-top: 8px; font-size: 12px; color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 4px; }
-  .history-meta { margin-top: 8px; display: flex; align-items: center; gap: 8px; }
 
-  /* -- STATS PAGE -- */
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .card-comment {
+    font-size: 13px;
+    color: var(--text-soft);
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+
+  .card-meta {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px;
+    color: #b09898;
+  }
+
+  .card-actions {
+    position: absolute; top: 12px; right: 12px;
+    display: flex; gap: 4px;
+  }
+
+  .icon-btn {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: rgba(232,82,106,0.06);
+    border-radius: 8px; cursor: pointer; font-size: 13px;
+    transition: all 0.15s;
+  }
+
+  .icon-btn:hover { background: var(--rose-light); }
+
+  /* DATE DIVIDERS */
+  .date-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 20px 0 12px;
+  }
+
+  .date-divider span {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    color: var(--rose);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .date-divider::before, .date-divider::after {
+    content: '';
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, rgba(232,82,106,0.2), transparent);
+  }
+
+  .date-divider::after { background: linear-gradient(90deg, transparent, rgba(232,82,106,0.2)); }
+
+  /* FAB */
+  .fab {
+    position: fixed;
+    bottom: calc(var(--tab-h) + 16px);
+    right: 20px;
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    border: none; border-radius: 18px;
+    color: white; font-size: 26px;
+    cursor: pointer; box-shadow: 0 4px 20px rgba(232,82,106,0.4);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    z-index: 99;
+    font-weight: 300;
+  }
+
+  .fab:active { transform: scale(0.92); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed;
+    inset: 0; background: rgba(45,31,31,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200; align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; animation: overlayIn 0.2s ease; }
+
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal {
+    background: white;
+    width: 100%; max-width: 480px;
+    border-radius: 28px 28px 0 0;
+    padding: 24px 20px 40px;
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: #e8d0d4;
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .form-group { margin-bottom: 16px; }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-soft);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .form-input, .form-textarea, .form-select {
+    width: 100%;
+    border: 1.5px solid #f0dde0;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: var(--blush);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--rose);
+    background: white;
+  }
+
+  .form-textarea { min-height: 80px; resize: none; }
+
+  /* CATEGORY CHIPS */
+  .cat-chips {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+
+  .cat-chip {
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #f0dde0;
+    background: var(--blush);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .cat-chip.selected {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: white;
+  }
+
+  /* SUBMIT BTN */
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(232,82,106,0.3);
+  }
+
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-secondary {
+    width: 100%;
+    background: var(--blush);
+    color: var(--rose-dark);
+    border: 1.5px solid var(--rose-light);
+    border-radius: 16px;
+    padding: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+
+  /* STATS */
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 20px;
+  }
+
   .stat-card {
-    background: var(--card); border-radius: var(--radius-sm);
-    box-shadow: var(--shadow); padding: 18px 16px; text-align: center;
+    background: white;
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(232,82,106,0.08);
   }
-  .stat-card.wide { grid-column: span 2; }
-  .stat-card .big-num { font-size: 36px; font-weight: 900; }
-  .stat-card .big-label { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 4px; }
-  .person-stat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-  .person-stat-name { font-size: 14px; font-weight: 800; min-width: 70px; }
-  .progress-bar-bg { flex: 1; height: 12px; background: var(--bg); border-radius: 6px; overflow: hidden; }
-  .progress-bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s cubic-bezier(0.34,1.56,0.64,1); }
-  .progress-bar-fill.dinesh { background: linear-gradient(90deg, var(--dinesh), #a29bfe); }
-  .progress-bar-fill.sushmi { background: linear-gradient(90deg, var(--sushmi), #ff6b9d); }
-  .person-stat-val { font-size: 13px; font-weight: 800; min-width: 30px; text-align: right; }
-  .insight-card {
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-    border-radius: var(--radius-sm); padding: 16px;
-    margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-start;
-  }
-  .insight-card:nth-child(2) { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
-  .insight-card:nth-child(3) { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); }
-  .insight-card:nth-child(4) { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
-  .insight-icon { font-size: 28px; }
-  .insight-text strong { font-size: 14px; display: block; }
-  .insight-text span { font-size: 12px; color: rgba(0,0,0,0.6); }
-  .chart-container { padding: 12px 0; }
-  .chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .chart-bar-label { font-size: 12px; font-weight: 700; min-width: 60px; color: var(--muted); }
-  .chart-bar-track { flex: 1; height: 20px; background: var(--bg); border-radius: 10px; overflow: hidden; }
-  .chart-bar-fill { height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
-  .chart-bar-fill span { font-size: 11px; font-weight: 800; color: white; }
 
-  /* Edit button */
-  .btn-edit {
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--rose);
+    font-weight: 600;
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+  }
+
+  .chart-bar-wrap { margin-bottom: 10px; }
+
+  .chart-bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 13px; margin-bottom: 5px;
+    color: var(--text);
+  }
+
+  .chart-bar-track {
+    background: var(--rose-light);
+    border-radius: 8px;
+    height: 10px;
+    overflow: hidden;
+  }
+
+  .chart-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rose), var(--rose-dark));
+    border-radius: 8px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* SECTION HEADING */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--text);
+    margin: 20px 0 12px;
+    font-style: italic;
+  }
+
+  /* HER LIKES CARD */
+  .likes-card {
+    background: white;
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(232,82,106,0.08);
+  }
+
+  .likes-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--rose-light), #f9e0e5);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .likes-info { flex: 1; min-width: 0; }
+  .likes-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .likes-loc { font-size: 12px; color: var(--text-soft); }
+
+  /* FUTURE TAG */
+  .future-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #7b6cf0, #5f4ee0);
+    color: white;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .card.future::before { background: #7b6cf0; }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-soft);
+  }
+
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-style: italic;
+    margin-bottom: 6px;
+    color: var(--rose);
+  }
+
+  .empty p { font-size: 14px; }
+
+  /* MANAGE CATEGORIES */
+  .cat-manage-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--blush);
+    border-radius: 12px;
     padding: 10px 14px;
-    background: var(--bg); border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
-    color: var(--muted); cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; gap: 5px;
+    margin-bottom: 8px;
   }
-  .btn-edit:hover { border-color: var(--coral); color: var(--coral); background: #fff5f5; }
 
-  /* Edit modal header accent */
-  .modal-title.edit { color: var(--coral); }
+  .cat-manage-name { font-size: 14px; font-weight: 500; }
 
-  /* Toast */
+  .delete-btn {
+    background: none; border: none; cursor: pointer;
+    color: #d45; font-size: 16px; padding: 2px 6px;
+    border-radius: 6px; transition: background 0.15s;
+  }
+
+  .delete-btn:hover { background: #fde; }
+
+  .add-cat-row {
+    display: flex; gap: 8px; margin-top: 8px;
+  }
+
+  .add-cat-input {
+    flex: 1;
+    border: 1.5px solid #f0dde0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none; background: var(--blush);
+  }
+
+  .add-cat-input:focus { border-color: var(--rose); background: white; }
+
+  .add-cat-btn {
+    background: var(--rose); color: white;
+    border: none; border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 18px; cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  /* Month tabs */
+  .month-tabs {
+    display: flex; gap: 8px;
+    overflow-x: auto; padding-bottom: 4px;
+    margin-bottom: 16px;
+    scrollbar-width: none;
+  }
+
+  .month-tabs::-webkit-scrollbar { display: none; }
+
+  .month-tab {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--rose-light);
+    background: white;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .month-tab.active {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: white;
+  }
+
+  .cat-emoji {
+    font-size: 14px;
+  }
+
+  input[type="datetime-local"] {
+    color-scheme: light;
+  }
+
   .toast {
-    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-    background: #2d3436; color: white; padding: 12px 24px;
-    border-radius: 25px; font-size: 14px; font-weight: 700;
-    z-index: 500; opacity: 0; transition: opacity 0.3s;
+    position: fixed;
+    bottom: calc(var(--tab-h) + 80px);
+    left: 50%; transform: translateX(-50%);
+    background: #2d1f1f;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s;
     pointer-events: none;
+    white-space: nowrap;
   }
+
   .toast.show { opacity: 1; }
 
-  @media (min-width: 600px) {
-    .app-header { padding: 28px 28px 70px; }
-    .page { padding: 24px; max-width: 600px; margin: 0 auto; }
-    .tab-bar { max-width: 600px; left: 50%; transform: translateX(-50%); }
-    .fab { right: calc(50% - 280px); }
+  /* PIN styles */
+  .pin-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid #f0dde0;
+    background: transparent;
+    transition: all 0.15s;
   }
+  .pin-dot.filled {
+    background: var(--rose);
+    border-color: var(--rose);
+    transform: scale(1.1);
+  }
+  .pin-dot.error {
+    background: #ff4444;
+    border-color: #ff4444;
+    animation: shake 0.4s ease;
+  }
+  .pin-key {
+    background: var(--blush);
+    border: 1.5px solid #f0dde0;
+    border-radius: 16px;
+    padding: 18px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.12s;
+    user-select: none;
+  }
+  .pin-key:active { background: var(--rose-light); transform: scale(0.93); }
+  .pin-del { font-size: 20px; color: var(--text-soft); }
 
-  /* iOS Install Banner */
-  .ios-install-banner {
-    display: none;
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: white;
-    border-top: 1px solid #e0d8d0;
-    border-radius: 20px 20px 0 0;
-    padding: 16px 20px 32px;
-    z-index: 300;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
-    animation: slideUp 0.3s ease;
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
   }
-  .ios-install-banner.show { display: block; }
-  .ios-banner-header {
-    display: flex; align-items: center;
-    justify-content: space-between; margin-bottom: 14px;
-  }
-  .ios-banner-title {
-    display: flex; align-items: center; gap: 10px;
-  }
-  .ios-banner-title img {
-    width: 44px; height: 44px; border-radius: 10px;
-  }
-  .ios-banner-title strong { font-size: 15px; display: block; }
-  .ios-banner-title span { font-size: 12px; color: var(--muted); }
-  .ios-banner-close {
-    background: #f0ebe4; border: none; border-radius: 50%;
-    width: 28px; height: 28px; font-size: 14px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  .ios-steps { display: flex; flex-direction: column; gap: 10px; }
-  .ios-step {
-    display: flex; align-items: center; gap: 12px;
-    background: #faf7f4; border-radius: 12px; padding: 10px 14px;
-  }
-  .ios-step-icon { font-size: 22px; flex-shrink: 0; }
-  .ios-step-text { font-size: 13px; font-weight: 600; color: var(--text); }
-  .ios-step-text span { color: var(--coral); font-weight: 800; }
 </style>
 </head>
 <body>
 
+<!-- PIN SCREEN -->
+<div id="auth-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:32px 24px; background:var(--cream);">
+
+  <div style="position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden;z-index:0;">
+    <div style="position:absolute;top:8%;left:10%;font-size:40px;opacity:0.06;transform:rotate(-15deg);">💕</div>
+    <div style="position:absolute;top:20%;right:8%;font-size:28px;opacity:0.05;transform:rotate(20deg);">❤️</div>
+    <div style="position:absolute;bottom:25%;left:6%;font-size:36px;opacity:0.05;transform:rotate(-10deg);">💝</div>
+    <div style="position:absolute;bottom:15%;right:12%;font-size:32px;opacity:0.06;transform:rotate(15deg);">💕</div>
+  </div>
+
+  <div style="position:relative;z-index:1;width:100%;max-width:340px;">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:40px;">
+      <div style="width:80px;height:80px;background:linear-gradient(135deg,#e8526a,#c73a52);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 16px;box-shadow:0 8px 32px rgba(232,82,106,0.35);">💕</div>
+      <div style="font-family:'Playfair Display',serif;font-size:34px;color:var(--rose);font-style:italic;letter-spacing:-0.5px;">Love Today</div>
+      <div style="font-size:14px;color:var(--text-soft);margin-top:6px;">Your private love story</div>
+    </div>
+
+    <!-- PIN Card -->
+    <div style="background:white;border-radius:28px;padding:32px 24px;box-shadow:0 8px 40px rgba(232,82,106,0.15);border:1px solid rgba(232,82,106,0.08);">
+      <div id="pin-title" style="font-family:'Playfair Display',serif;font-size:18px;color:var(--text);text-align:center;margin-bottom:6px;font-style:italic;">Enter your 6-digit PIN</div>
+      <div id="pin-subtitle" style="font-size:13px;color:var(--text-soft);text-align:center;margin-bottom:24px;">Same PIN on all your devices</div>
+
+      <!-- PIN dots display -->
+      <div style="display:flex;justify-content:center;gap:12px;margin-bottom:28px;" id="pin-dots">
+        <div class="pin-dot" id="dot-0"></div>
+        <div class="pin-dot" id="dot-1"></div>
+        <div class="pin-dot" id="dot-2"></div>
+        <div class="pin-dot" id="dot-3"></div>
+        <div class="pin-dot" id="dot-4"></div>
+        <div class="pin-dot" id="dot-5"></div>
+      </div>
+
+      <!-- Error message -->
+      <div id="pin-error" style="color:#e8526a;font-size:13px;text-align:center;min-height:18px;margin-bottom:12px;"></div>
+
+      <!-- Number Pad -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <div></div>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key pin-del" onclick="pinDelete()">⌫</button>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:12px;color:#c4a0a5;margin-top:20px;">🔒 PIN never leaves your device</p>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app-shell" style="display:none;">
+
 <!-- HEADER -->
-<div class="app-header">
+<div class="header">
   <div class="header-top">
-    <div>
-      <div class="app-title">🏠 HappyFamily</div>
-      <div class="app-subtitle">Your family task manager</div>
-    </div>
-    <div class="header-icons">
-      <button class="header-icon-btn" onclick="showPage('stats')">📊</button>
+    <span class="app-title">💕 Love Today</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="header-btn" onclick="openManageCategories()">✦ Categories</button>
+      <button class="header-btn" onclick="handleSignOut()" style="background:#fff0f2;">🔒 Lock</button>
     </div>
   </div>
 </div>
 
-<!-- TABS -->
-<div class="tab-bar">
-  <button class="tab-btn active" id="tab-home" onclick="showPage('home')">
-    <span class="tab-icon">🏠</span>Home
-  </button>
-  <button class="tab-btn" id="tab-assign" onclick="showPage('assign')">
-    <span class="tab-icon">📋</span>Assign
-    <span class="tab-badge" id="assign-badge" style="display:none"></span>
-  </button>
-  <button class="tab-btn" id="tab-history" onclick="showPage('history')">
-    <span class="tab-icon">📜</span>History
-  </button>
-  <button class="tab-btn" id="tab-stats" onclick="showPage('stats')">
-    <span class="tab-icon">📊</span>Stats
-  </button>
-</div>
+<!-- CONTENT -->
+<div class="content">
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div id="home-content"></div>
+  </div>
 
-<!-- SYNC STATUS BAR -->
-<div id="sync-bar" style="
-  display:none; text-align:center; padding:8px 16px;
-  color:white; font-family:'Nunito',sans-serif;
-  font-size:12px; font-weight:700; letter-spacing:0.3px;
-  position:sticky; top:52px; z-index:99;
-  transition: background 0.3s;
-"></div>
+  <!-- HISTORY -->
+  <div class="screen" id="screen-history">
+    <div class="month-tabs" id="month-tabs"></div>
+    <div id="history-content"></div>
+  </div>
 
-<!-- HOME PAGE -->
-<div class="page active" id="page-home">
-  <div class="greeting-card">
-    <div>
-      <h2 id="greeting-text">Good morning! 👋</h2>
-      <p id="greeting-date"></p>
-    </div>
-    <div class="greeting-emoji" id="greeting-emoji">🌅</div>
+  <!-- HER LIKES -->
+  <div class="screen" id="screen-likes">
+    <p class="section-title">Things she loves 💝</p>
+    <div id="likes-content"></div>
   </div>
-  <div class="quick-stats">
-    <div class="quick-stat-card">
-      <div class="stat-num" id="qs-pending" style="color:var(--coral)">0</div>
-      <div class="stat-label">Pending Tasks</div>
-    </div>
-    <div class="quick-stat-card">
-      <div class="stat-num" id="qs-done" style="color:var(--teal)">0</div>
-      <div class="stat-label">Completed</div>
-    </div>
-  </div>
-  <div class="section-title">Recent Tasks</div>
-  <div class="recent-list" id="home-recent-list">
-    <div class="empty-state">
-      <div class="empty-icon">🛒</div>
-      <p>No tasks yet!</p>
-      <span>Tap the + button to add your first task</span>
-    </div>
-  </div>
-</div>
 
-<!-- ASSIGN PAGE -->
-<div class="page" id="page-assign">
-  <div class="filter-row">
-    <button class="filter-chip active-all" id="filter-all" onclick="setFilter('all')">All</button>
-    <button class="filter-chip" id="filter-dinesh" onclick="setFilter('dinesh')">👨 Dinesh</button>
-    <button class="filter-chip" id="filter-sushmi" onclick="setFilter('sushmi')">👩 Sushmi</button>
+  <!-- FUTURE -->
+  <div class="screen" id="screen-future">
+    <p class="section-title">Plans to look forward to 🌟</p>
+    <div id="future-content"></div>
   </div>
-  <div id="assign-list">
-    <div class="empty-state">
-      <div class="empty-icon">✅</div>
-      <p>All clear!</p>
-      <span>No pending tasks assigned</span>
-    </div>
-  </div>
-</div>
 
-<!-- HISTORY PAGE -->
-<div class="page" id="page-history">
-  <div id="history-list">
-    <div class="empty-state">
-      <div class="empty-icon">📜</div>
-      <p>No history yet</p>
-      <span>Completed tasks will appear here</span>
-    </div>
-  </div>
-</div>
-
-<!-- STATS PAGE -->
-<div class="page" id="page-stats">
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="big-num" id="st-total" style="color:var(--coral)">0</div>
-      <div class="big-label">Total Tasks</div>
-    </div>
-    <div class="stat-card">
-      <div class="big-num" id="st-complete" style="color:var(--teal)">0</div>
-      <div class="big-label">Completed</div>
-    </div>
-    <div class="stat-card wide">
-      <div class="section-title" style="text-align:left;margin-bottom:16px">Task Distribution</div>
-      <div class="person-stat-row">
-        <span class="person-stat-name" style="color:var(--dinesh)">👨 Dinesh</span>
-        <div class="progress-bar-bg"><div class="progress-bar-fill dinesh" id="bar-dinesh" style="width:0%"></div></div>
-        <span class="person-stat-val" id="val-dinesh">0</span>
-      </div>
-      <div class="person-stat-row">
-        <span class="person-stat-name" style="color:#c44fcc">👩 Sushmi</span>
-        <div class="progress-bar-bg"><div class="progress-bar-fill sushmi" id="bar-sushmi" style="width:0%"></div></div>
-        <span class="person-stat-val" id="val-sushmi">0</span>
-      </div>
-    </div>
-    <div class="stat-card wide">
-      <div class="section-title" style="text-align:left;margin-bottom:16px">Completion Rate by Day</div>
-      <div class="chart-container" id="day-chart">
-        <div style="color:var(--muted);font-size:13px;text-align:center">No data yet</div>
-      </div>
-    </div>
-  </div>
-  <div class="section-title">Insights 💡</div>
-  <div id="insights-container">
-    <div class="empty-state"><div class="empty-icon">🔮</div><p>No insights yet</p><span>Complete some tasks to see insights!</span></div>
-  </div>
-</div>
-
-<!-- EDIT TASK MODAL -->
-<div class="modal-overlay" id="edit-modal-overlay" onclick="closeEditModalOutside(event)">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-header">
-      <span class="modal-title edit">✏️ Edit Task List</span>
-      <button class="modal-close" onclick="closeEditModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="assign-toggle-row">
-        <span>Assign all to:</span>
-        <button class="person-chip dinesh" id="edit-global-dinesh" onclick="setEditGlobalAssign('Dinesh')">👨 Dinesh</button>
-        <button class="person-chip sushmi" id="edit-global-sushmi" onclick="setEditGlobalAssign('Sushmi')">👩 Sushmi</button>
-        <button class="person-chip" id="edit-global-none" onclick="setEditGlobalAssign('')" style="background:var(--bg)">Individual</button>
-      </div>
-      <div class="items-table-wrap">
-        <table class="items-table">
-          <thead>
-            <tr>
-              <th style="width:36px">#</th>
-              <th>Item Name</th>
-              <th style="width:70px">Qty</th>
-              <th style="width:90px">Unit</th>
-              <th style="width:110px">Assign To</th>
-              <th style="width:36px"></th>
-            </tr>
-          </thead>
-          <tbody id="edit-items-tbody"></tbody>
-        </table>
-      </div>
-      <button class="btn-add-row" onclick="addEditItemRow()">+ Add Item</button>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-primary" onclick="submitEditTask()" style="background:linear-gradient(135deg,var(--teal),var(--teal-dark))">💾 Save Changes</button>
-    </div>
-  </div>
-</div>
-
-<!-- iOS INSTALL BANNER -->
-<div class="ios-install-banner" id="ios-install-banner">
-  <div class="ios-banner-header">
-    <div class="ios-banner-title">
-      <img src="icon-192.png" alt="HappyFamily">
-      <div>
-        <strong>Install HappyFamily</strong>
-        <span>Add to your Home Screen</span>
-      </div>
-    </div>
-    <button class="ios-banner-close" onclick="dismissIOSBanner()">x</button>
-  </div>
-  <div class="ios-steps">
-    <div class="ios-step">
-      <div class="ios-step-icon">1</div>
-      <div class="ios-step-text">Tap the <span>Share</span> button at the bottom of Safari</div>
-    </div>
-    <div class="ios-step">
-      <div class="ios-step-icon">2</div>
-      <div class="ios-step-text">Scroll down and tap <span>Add to Home Screen</span></div>
-    </div>
-    <div class="ios-step">
-      <div class="ios-step-icon">3</div>
-      <div class="ios-step-text">Tap <span>Add</span> in the top right corner</div>
-    </div>
+  <!-- STATS -->
+  <div class="screen" id="screen-stats">
+    <div id="stats-content"></div>
   </div>
 </div>
 
 <!-- FAB -->
-<button class="fab" id="fab-btn" onclick="openModal()">+</button>
+<button class="fab" id="fab" onclick="openAddModal()">+</button>
 
-<!-- ADD TASK MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-item active" onclick="switchTab('home', this)">
+    <span class="tab-icon">🏠</span>Home
+  </button>
+  <button class="tab-item" onclick="switchTab('history', this)">
+    <span class="tab-icon">📖</span>History
+  </button>
+  <button class="tab-item" onclick="switchTab('likes', this)">
+    <span class="tab-icon">💝</span>Her Likes
+  </button>
+  <button class="tab-item" onclick="switchTab('future', this)">
+    <span class="tab-icon">🌟</span>Future
+  </button>
+  <button class="tab-item" onclick="switchTab('stats', this)">
+    <span class="tab-icon">📊</span>Stats
+  </button>
+</div>
+
+<!-- ADD ENTRY MODAL -->
+<div class="modal-overlay" id="entry-modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-header">
-      <span class="modal-title">📝 New Task List</span>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modal-title">New Memory ✨</div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <input type="text" class="form-input" id="inp-desc" placeholder="What happened today...">
     </div>
-    <div class="modal-body">
-      <div class="assign-toggle-row">
-        <span>Assign all to:</span>
-        <button class="person-chip dinesh" id="global-dinesh" onclick="setGlobalAssign('Dinesh')">👨 Dinesh</button>
-        <button class="person-chip sushmi" id="global-sushmi" onclick="setGlobalAssign('Sushmi')">👩 Sushmi</button>
-        <button class="person-chip" id="global-none" onclick="setGlobalAssign('')" style="background:var(--bg)">Individual</button>
-      </div>
-      <div class="items-table-wrap">
-        <table class="items-table">
-          <thead>
-            <tr>
-              <th style="width:36px">#</th>
-              <th>Item Name</th>
-              <th style="width:70px">Qty</th>
-              <th style="width:90px">Unit</th>
-              <th style="width:110px">Assign To</th>
-              <th style="width:36px"></th>
-            </tr>
-          </thead>
-          <tbody id="items-tbody"></tbody>
-        </table>
-      </div>
-      <button class="btn-add-row" onclick="addItemRow()">＋ Add Item</button>
+    <div class="form-group">
+      <label class="form-label">Date & Time</label>
+      <input type="datetime-local" class="form-input" id="inp-datetime">
     </div>
-    <div class="modal-footer">
-      <button class="btn-primary" onclick="submitTasks()">🚀 Create Task List</button>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <div class="cat-chips" id="cat-chips"></div>
     </div>
+    <div class="form-group">
+      <label class="form-label">Comment</label>
+      <textarea class="form-textarea" id="inp-comment" placeholder="Add a sweet note..."></textarea>
+    </div>
+    <button class="btn-primary" onclick="saveEntry()">Save Memory 💕</button>
+    <button class="btn-secondary" onclick="closeModal('entry-modal')">Cancel</button>
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- ADD LIKES MODAL -->
+<div class="modal-overlay" id="likes-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add Her Like 💝</div>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input type="text" class="form-input" id="inp-like-name" placeholder="e.g. Lavender scented candles">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Location</label>
+      <input type="text" class="form-input" id="inp-like-loc" placeholder="e.g. Blue Jasmine, Park Street">
+    </div>
+    <button class="btn-primary" onclick="saveLike()">Save 💝</button>
+    <button class="btn-secondary" onclick="closeModal('likes-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ADD FUTURE MODAL -->
+<div class="modal-overlay" id="future-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Future Plan 🌟</div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <input type="text" class="form-input" id="inp-fut-desc" placeholder="A dream date, trip, surprise...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date & Time</label>
+      <input type="datetime-local" class="form-input" id="inp-fut-datetime">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <div class="cat-chips" id="fut-cat-chips"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="inp-fut-comment" placeholder="Details, ideas, feelings..."></textarea>
+    </div>
+    <button class="btn-primary" onclick="saveFuture()">Save Plan 🌟</button>
+    <button class="btn-secondary" onclick="closeModal('future-modal')">Cancel</button>
+  </div>
+</div>
+
+<!-- MANAGE CATEGORIES MODAL -->
+<div class="modal-overlay" id="cat-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Manage Categories ✦</div>
+    <div id="cat-list"></div>
+    <div class="add-cat-row">
+      <input type="text" class="add-cat-input" id="new-cat-input" placeholder="New category name...">
+      <button class="add-cat-btn" onclick="addCategory()">+</button>
+    </div>
+    <button class="btn-secondary" style="margin-top:20px" onclick="closeModal('cat-modal')">Done</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Edit Memory ✏️</div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <input type="text" class="form-input" id="edit-desc">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Date & Time</label>
+      <input type="datetime-local" class="form-input" id="edit-datetime">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <div class="cat-chips" id="edit-cat-chips"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Comment</label>
+      <textarea class="form-textarea" id="edit-comment"></textarea>
+    </div>
+    <button class="btn-primary" onclick="updateEntry()">Update 💕</button>
+    <button class="btn-secondary" onclick="closeModal('edit-modal')">Cancel</button>
+  </div>
+</div>
+
+</div><!-- end app-shell -->
+
 <div class="toast" id="toast"></div>
+
+<!-- Firebase Compat SDK — no module timing issues -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-// ========================================================
-//  HAPPYFAMILY - SINGLE SCRIPT, REAL-TIME FIREBASE SYNC
-// ========================================================
+  const _fbApp = firebase.initializeApp({
+    apiKey: "AIzaSyAtmbfK7tKPTioxoQuC0kqq9Y0MGC95wPE",
+    authDomain: "love-today-231dc.firebaseapp.com",
+    projectId: "love-today-231dc",
+    storageBucket: "love-today-231dc.firebasestorage.app",
+    messagingSenderId: "576243792568",
+    appId: "1:576243792568:web:1e4acfb0c4795dc318524d"
+  });
+  window._db = firebase.firestore();
+</script>
 
-// ==============================================================
-// STEP 1: Paste each value from Firebase Project Settings below
-// ==============================================================
-const HF_KEY        = "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk";
-const HF_AUTH    = "happyfamily-e4f68.firebaseapp.com";
-const HF_PROJECT     = "happyfamily-e4f68";
-const HF_BUCKET = "happyfamily-e4f68.firebasestorage.app";
-const HF_MSGID   = "740546226739";
-const HF_APPID         = "1:740546226739:web:8247b42ed7b059fe5a9146";
+<script>
+// DATA — starts empty, loaded from Firestore
+let data = { entries: [], likes: [], future: [], categories: ['Food','Gift','Movie','Place','Sex','Argument','Date','Trip'] };
+let _unsubscribers = [];
 
-// ==============================================================
-// STEP 2: Paste your Realtime Database URL below
-// Find it: Firebase Console > Realtime Database > Data tab
-// Your project URL is:
-// https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
-// ==============================================================
-const HF_DBURL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
+function initFirestoreSync() {
+  const db = window._db;
+  const uid = window._userId;
+  if (!db || !uid) { showToast('Connection error. Reload app.'); return; }
 
-// (Do not edit below this line)
-const HF_CONFIG = {
-  apiKey           : HF_KEY,
-  authDomain       : HF_AUTH,
-  projectId        : HF_PROJECT,
-  storageBucket    : HF_BUCKET,
-  messagingSenderId: HF_MSGID,
-  appId            : HF_APPID
+  _unsubscribers.forEach(u => u());
+  _unsubscribers = [];
+
+  const base = db.collection('users').doc(uid);
+
+  // Settings (categories)
+  _unsubscribers.push(base.collection('settings').doc('main').onSnapshot(snap => {
+    if (snap.exists) data.categories = snap.data().categories || data.categories;
+    refreshCurrentTab();
+  }, err => showToast('Sync error: ' + err.message)));
+
+  // Entries — no orderBy to avoid index requirement, sort client-side
+  _unsubscribers.push(base.collection('entries').onSnapshot(snap => {
+    data.entries = snap.docs.map(d => ({ ...d.data(), _docId: d.id }))
+      .sort((a, b) => (b.datetime || '').localeCompare(a.datetime || ''));
+    refreshCurrentTab();
+  }, err => showToast('Entries error: ' + err.message)));
+
+  // Likes
+  _unsubscribers.push(base.collection('likes').onSnapshot(snap => {
+    data.likes = snap.docs.map(d => ({ ...d.data(), _docId: d.id }))
+      .sort((a, b) => (b.datetime || '').localeCompare(a.datetime || ''));
+    if (window.currentTab === 'likes') renderLikes();
+  }, err => showToast('Likes error: ' + err.message)));
+
+  // Future
+  _unsubscribers.push(base.collection('future').onSnapshot(snap => {
+    data.future = snap.docs.map(d => ({ ...d.data(), _docId: d.id }))
+      .sort((a, b) => (a.datetime || '').localeCompare(b.datetime || ''));
+    if (window.currentTab === 'future') renderFuture();
+  }, err => showToast('Future error: ' + err.message)));
+}
+
+function refreshCurrentTab() {
+  const t = window.currentTab || 'home';
+  if (t === 'home') renderHome();
+  else if (t === 'history') renderHistory();
+  else if (t === 'stats') renderStats();
+}
+
+async function save() {
+  // No-op: direct Firestore writes handle persistence
+}
+
+async function fbAdd(col, obj) {
+  const db = window._db;
+  const uid = window._userId;
+  if (!db || !uid) { showToast('Not connected. Try again.'); return; }
+  delete obj._docId;
+  try {
+    await db.collection('users').doc(uid).collection(col).add(obj);
+  } catch(e) { console.error('fbAdd error:', e); showToast('Save failed: ' + e.message); }
+}
+
+async function fbUpdate(col, docId, obj) {
+  const db = window._db;
+  const uid = window._userId;
+  if (!db || !uid || !docId) { showToast('Update error.'); return; }
+  delete obj._docId;
+  try {
+    await db.collection('users').doc(uid).collection(col).doc(docId).update(obj);
+  } catch(e) { console.error('fbUpdate error:', e); showToast('Update failed: ' + e.message); }
+}
+
+async function fbDelete(col, docId) {
+  const db = window._db;
+  const uid = window._userId;
+  if (!db || !uid || !docId) return;
+  try {
+    await db.collection('users').doc(uid).collection(col).doc(docId).delete();
+  } catch(e) { console.error('fbDelete error:', e); showToast('Delete failed.'); }
+}
+
+async function fbSaveCategories(cats) {
+  const db = window._db;
+  const uid = window._userId;
+  if (!db || !uid) return;
+  try {
+    await db.collection('users').doc(uid).collection('settings').doc('main').set({ categories: cats }, { merge: true });
+  } catch(e) { console.error('fbSaveCategories error:', e); }
+}
+
+let currentTab = 'home';
+let editIndex = null;
+let editFutureIndex = null;
+
+const catEmoji = {
+  'Food':'🍽️','Gift':'🎁','Movie':'🎬','Place':'📍','Sex':'💋','Argument':'💬',
+  'Date':'💕','Trip':'✈️'
 };
 
-// -- SINGLE SOURCE OF TRUTH --
-const appData = { tasks: {}, history: {} };
+function getEmoji(cat) { return catEmoji[cat] || '✦'; }
 
-// -- FIREBASE STATE --
-let _db       = null;   // firebase database instance
-let _ref      = null;   // firebase ref function
-let _set      = null;   // firebase set function
-let _remove   = null;   // firebase remove function
-let fbReady   = false;  // true once listener is active
-
-// -- SYNC STATUS UI --
-function setSyncStatus(state) {
-  // state: 'connecting' | 'live' | 'local' | 'error'
-  const bar = document.getElementById('sync-bar');
-  if (!bar) return;
-  const cfg = {
-    connecting : { bg:'#667eea', text:'⏳ Connecting to Firebase...' },
-    live       : { bg:'#27ae60', text:'🟢 Live sync active - all devices in sync' },
-    local      : { bg:'#636e72', text:'💾 Offline mode - data saved locally' },
-    error      : { bg:'#e17055', text:'⚠️ Firebase error - using local storage' },
-  };
-  const c = cfg[state] || cfg.local;
-  bar.style.background = c.bg;
-  bar.textContent = c.text;
-  bar.style.display = 'block';
-  if (state === 'live') setTimeout(() => { bar.style.display = 'none'; }, 3000);
-}
-
-// -- FIREBASE INIT --
-function initFirebase() {
-  if (HF_CONFIG.apiKey.startsWith('PASTE_')) {
-    setSyncStatus('local');
-    return;
-  }
-  setSyncStatus('connecting');
-  Promise.all([
-    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js'),
-    import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js')
-  ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onValue }]) => {
-
-    const fbApp = initializeApp(HF_CONFIG);
-    // Pass the database URL explicitly - required for non-US regional databases
-    _db     = getDatabase(fbApp, HF_DBURL);
-    _ref    = ref;
-    _set    = set;
-    _remove = remove;
-
-    // -- REAL-TIME LISTENER --
-    // This fires immediately with current data, then again on EVERY change
-    // from ANY device - web or mobile. This is the only way data flows IN.
-    onValue(_ref(_db, 'happyfamily'), (snap) => {
-      const d = snap.val() || {};
-      appData.tasks   = d.tasks   || {};
-      appData.history = d.history || {};
-      saveLocal();
-      renderAll();
-      if (!fbReady) {
-        fbReady = true;
-        setSyncStatus('live');
-      }
-    }, (err) => {
-      console.error('Firebase read error:', err);
-      setSyncStatus('error');
-    });
-
-  }).catch(err => {
-    console.error('Firebase load error:', err);
-    setSyncStatus('error');
-  });
-}
-
-// -- FIREBASE WRITE HELPERS --
-// Each writes ONLY its own record - never overwrites sibling data
-function fbSaveTask(id, obj) {
-  if (!fbReady) return;
-  _set(_ref(_db, 'happyfamily/tasks/' + id), obj).catch(e => console.error('fbSaveTask:', e));
-}
-function fbDeleteTask(id) {
-  if (!fbReady) return;
-  _remove(_ref(_db, 'happyfamily/tasks/' + id)).catch(e => console.error('fbDeleteTask:', e));
-}
-function fbSaveHistory(id, obj) {
-  if (!fbReady) return;
-  _set(_ref(_db, 'happyfamily/history/' + id), obj).catch(e => console.error('fbSaveHistory:', e));
-}
-
-// -- LOCAL STORAGE --
-function saveLocal() {
-  try { localStorage.setItem('hf_data', JSON.stringify(appData)); } catch(e) {}
-}
-function loadLocal() {
-  try {
-    const s = localStorage.getItem('hf_data');
-    if (s) { const d = JSON.parse(s); appData.tasks = d.tasks||{}; appData.history = d.history||{}; }
-  } catch(e) {}
-}
-
-// -- TASK OPERATIONS --
-function saveTask(taskObj) {
-  const id   = 'task_' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
-  taskObj.id = id;
-  appData.tasks[id] = taskObj;
-  saveLocal();
-  renderAll();
-  fbSaveTask(id, taskObj);   // push to Firebase -> triggers onValue on all other devices
-}
-
-function completeTask(taskId) {
-  const el      = document.getElementById('comment-' + taskId);
-  const comment = el ? el.value.trim() : '';
-  const task    = appData.tasks[taskId];
-  if (!task) return;
-  task.completedAt = new Date().toISOString();
-  task.comment     = comment;
-  task.status      = 'done';
-  const histId     = 'hist_' + Date.now();
-  appData.history[histId] = JSON.parse(JSON.stringify(task));
-  delete appData.tasks[taskId];
-  saveLocal();
-  renderAll();
-  fbSaveHistory(histId, appData.history[histId]);  // write history record
-  fbDeleteTask(taskId);                            // remove task record
-  showToast('🎉 Task completed!');
-}
-
-// -- UI STATE --
-let currentFilter = 'all';
-let globalAssign  = '';
-let rowCount      = 0;
-
-// -- GREETING --
-function updateGreeting() {
-  const h    = new Date().getHours();
-  const idx  = h < 12 ? 0 : h < 17 ? 1 : h < 21 ? 2 : 3;
-  const msgs  = ['Good morning! 👋', 'Good afternoon! ☀️', 'Good evening! 🌆', 'Good night! 🌙'];
-  const emojis = ['🌅', '☀️', '🌆', '🌙'];
-  document.getElementById('greeting-text').textContent  = msgs[idx];
-  document.getElementById('greeting-emoji').textContent = emojis[idx];
-  document.getElementById('greeting-date').textContent  =
-    new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
-}
-
-// -- PAGE NAV --
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'stats') renderStats();
-}
-
-// -- MODAL --
-function openModal() {
-  document.getElementById('modal-overlay').classList.add('open');
-  document.getElementById('items-tbody').innerHTML = '';
-  rowCount     = 0;
-  globalAssign = '';
-  updateGlobalChips();
-  addItemRow();
-}
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-function closeModalOutside(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
-
-// -- GLOBAL ASSIGN --
-function setGlobalAssign(val) {
-  globalAssign = val;
-  updateGlobalChips();
-  document.querySelectorAll('.assign-select').forEach(sel => { if (val) sel.value = val; });
-}
-function updateGlobalChips() {
-  document.getElementById('global-dinesh').classList.toggle('active', globalAssign === 'Dinesh');
-  document.getElementById('global-sushmi').classList.toggle('active', globalAssign === 'Sushmi');
-  document.getElementById('global-none').classList.toggle('active',   globalAssign === '');
-}
-
-// -- ADD / REMOVE ROWS --
-function addItemRow() {
-  rowCount++;
-  const tbody = document.getElementById('items-tbody');
-  const tr    = document.createElement('tr');
-  tr.innerHTML = `
-    <td class="sno-cell">${rowCount}</td>
-    <td><input type="text"   placeholder="e.g. Milk"  class="item-name-input"></td>
-    <td><input type="number" placeholder="1" min="1"  class="item-qty-input" style="text-align:center"></td>
-    <td>
-      <select class="item-unit-input">
-        <option>Pieces</option><option>Qty</option><option>Kg</option>
-        <option>Litre</option><option>Pack</option><option>Dozen</option>
-      </select>
-    </td>
-    <td>
-      <select class="assign-select">
-        <option value="Both">Both</option>
-        <option value="Dinesh">👨 Dinesh</option>
-        <option value="Sushmi">👩 Sushmi</option>
-      </select>
-    </td>
-    <td><button class="remove-row-btn" onclick="removeRow(this)">✕</button></td>
-  `;
-  if (globalAssign) tr.querySelector('.assign-select').value = globalAssign;
-  tbody.appendChild(tr);
-  tr.querySelector('.item-name-input').focus();
-}
-
-function removeRow(btn) {
-  btn.closest('tr').remove();
-  document.querySelectorAll('#items-tbody tr').forEach((row, i) => {
-    row.querySelector('.sno-cell').textContent = i + 1;
-  });
-  rowCount = document.querySelectorAll('#items-tbody tr').length;
-}
-
-// -- SUBMIT TASKS --
-function submitTasks() {
-  const rows  = document.querySelectorAll('#items-tbody tr');
-  const items = [];
-  let valid   = true;
-
-  rows.forEach(row => {
-    const nameEl = row.querySelector('.item-name-input');
-    const name   = nameEl.value.trim();
-    if (!name) {
-      valid = false;
-      nameEl.style.borderColor = 'var(--coral)';
-      nameEl.addEventListener('input', () => nameEl.style.borderColor = '', { once: true });
-      return;
-    }
-    const qty      = row.querySelector('.item-qty-input').value  || '1';
-    const unit     = row.querySelector('.item-unit-input').value;
-    const assignTo = row.querySelector('.assign-select').value   || 'Both';
-    items.push({ name, qty, unit, assignTo });
-  });
-
-  if (!valid)          { showToast('⚠️ Please fill all item names'); return; }
-  if (items.length === 0) { showToast('⚠️ Add at least one item');  return; }
-
-  const allNames = items.map(i => i.name).join(', ');
-  const title    = allNames.length > 42 ? allNames.substring(0, 42) + '...' : allNames;
-
-  saveTask({
-    items,
-    title,
-    createdAt : new Date().toISOString(),
-    status    : 'pending'
-  });
-
-  closeModal();
-  showToast('✅ Task list created!');
-  showPage('assign');
-}
-
-// -- FILTER --
-function setFilter(f) {
-  currentFilter = f;
-  ['all','dinesh','sushmi'].forEach(x => {
-    document.getElementById('filter-' + x).className =
-      'filter-chip' + (f === x ? ` active-${x}` : '');
-  });
-  renderAssign();
-}
-
-// -- RENDER ALL --
-function renderAll() {
-  renderHome();
-  renderAssign();
-  renderHistory();
-  updateBadge();
-}
-
-// -- HOME --
-function renderHome() {
-  const tasks = Object.values(appData.tasks);
-  const hist  = Object.values(appData.history);
-  document.getElementById('qs-pending').textContent = tasks.length;
-  document.getElementById('qs-done').textContent    = hist.length;
-
-  const list = document.getElementById('home-recent-list');
-  const all  = [...tasks, ...hist]
-    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5);
-
-  if (all.length === 0) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">🛒</div>
-      <p>No tasks yet!</p><span>Tap + to add your first task</span>
-    </div>`;
-    return;
-  }
-
-  list.innerHTML = all.map(t => {
-    const persons  = [...new Set(t.items.map(i => i.assignTo))];
-    const tagClass = (persons.includes('Both') || persons.length > 1)
-      ? 'both' : persons[0]?.toLowerCase() || 'both';
-    const tagText  = tagClass === 'both' ? '👨👩 Both'
-      : tagClass === 'dinesh' ? '👨 Dinesh' : '👩 Sushmi';
-    return `<div class="recent-item" style="${t.status==='done'?'opacity:0.6':''}">
-      <div class="recent-item-icon">${t.status==='done'?'✅':'🛒'}</div>
-      <div class="recent-item-info">
-        <strong>${esc(t.title || 'Task list')}</strong>
-        <span>${t.items.length} item${t.items.length!==1?'s':''} · ${fmtDate(t.createdAt)}</span>
-      </div>
-      <span class="person-tag ${tagClass}">${tagText}</span>
-    </div>`;
-  }).join('');
-}
-
-// -- ASSIGN --
-function renderAssign() {
-  const tasks    = Object.values(appData.tasks).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const list     = document.getElementById('assign-list');
-
-  let filtered = tasks;
-  if (currentFilter !== 'all') {
-    const person = currentFilter === 'dinesh' ? 'Dinesh' : 'Sushmi';
-    filtered = tasks.filter(t =>
-      t.items.some(i => i.assignTo === person || i.assignTo === 'Both')
-    );
-  }
-
-  if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">✅</div><p>All clear!</p>
-      <span>No pending tasks${currentFilter!=='all'?' for this person':''}</span>
-    </div>`;
-    return;
-  }
-
-  list.innerHTML = filtered.map(task => {
-    const persons  = [...new Set(task.items.map(i => i.assignTo))];
-    const tagClass = (persons.includes('Both') || persons.length > 1)
-      ? 'both' : persons[0]?.toLowerCase() || 'both';
-    const tagText  = tagClass === 'both' ? '👨👩 Both'
-      : tagClass === 'dinesh' ? '👨 Dinesh' : '👩 Sushmi';
-    const showItems = currentFilter !== 'all'
-      ? task.items.filter(i => i.assignTo === (currentFilter==='dinesh'?'Dinesh':'Sushmi') || i.assignTo === 'Both')
-      : task.items;
-
-    return `<div class="task-card">
-      <div class="task-card-header">
-        <div>
-          <div class="task-card-title">${esc(task.title || 'Task list')}</div>
-          <div class="task-card-meta">${task.items.length} item${task.items.length!==1?'s':''}</div>
-        </div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
-          <span class="person-tag ${tagClass}">${tagText}</span>
-          <span class="task-date-badge">${fmtDate(task.createdAt)}</span>
-        </div>
-      </div>
-      <div class="task-items-list">
-        ${showItems.map(item => `<div class="task-item-row">
-          <span class="item-name">🔹 ${esc(item.name)}</span>
-          <span class="item-qty">${esc(item.qty)} ${esc(item.unit)} ·
-            <b style="color:${item.assignTo==='Dinesh'?'var(--dinesh)':item.assignTo==='Sushmi'?'#c44fcc':'#27ae60'}">
-              ${esc(item.assignTo)}
-            </b>
-          </span>
-        </div>`).join('')}
-      </div>
-      <div class="task-card-actions">
-        <button class="btn-edit" onclick="openEditModal('${task.id}')">✏️ Edit</button>
-        <input type="text" class="comment-input"
-          placeholder="💬 Optional comment..." id="comment-${task.id}">
-        <button class="btn-complete" onclick="completeTask('${task.id}')">✓ Done</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// -- HISTORY --
-function renderHistory() {
-  const hist = Object.values(appData.history)
-    .sort((a,b) => new Date(b.completedAt) - new Date(a.completedAt));
-  const list = document.getElementById('history-list');
-
-  if (hist.length === 0) {
-    list.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">📜</div><p>No history yet</p>
-      <span>Completed tasks will appear here</span>
-    </div>`;
-    return;
-  }
-
-  const groups = {};
-  hist.forEach(h => {
-    const key = new Date(h.completedAt).toLocaleDateString('en-US',{year:'numeric',month:'long'});
-    (groups[key] = groups[key] || []).push(h);
-  });
-
-  list.innerHTML = Object.entries(groups).map(([month, items]) => `
-    <div class="history-month-group">
-      <div class="history-month-label">📅 ${month}
-        <span style="color:var(--coral);margin-left:6px">${items.length}</span>
-      </div>
-      ${items.map(t => {
-        const persons = [...new Set(t.items.map(i=>i.assignTo))];
-        return `<div class="history-card">
-          <div class="history-card-header">
-            <div class="history-card-title">${esc(t.title||'Task list')}</div>
-            <span class="completed-badge">✅ Done</span>
-          </div>
-          <div class="history-items">
-            ${t.items.map(i=>`<span class="history-item-chip">🔹 ${esc(i.name)} · ${esc(i.qty)} ${esc(i.unit)}</span>`).join('')}
-          </div>
-          <div class="history-meta">
-            ${persons.map(p=>{
-              const cls  = p==='Dinesh'?'dinesh':p==='Sushmi'?'sushmi':'both';
-              const icon = p==='Dinesh'?'👨':p==='Sushmi'?'👩':'👨👩';
-              return `<span class="person-tag ${cls}">${icon} ${esc(p)}</span>`;
-            }).join('')}
-            <span style="font-size:12px;color:var(--muted);margin-left:auto">${fmtDate(t.completedAt)}</span>
-          </div>
-          ${t.comment ? `<div class="history-comment">💬 "${esc(t.comment)}"</div>` : ''}
-        </div>`;
-      }).join('')}
-    </div>`).join('');
-}
-
-// -- STATS --
-function renderStats() {
-  const tasks = Object.values(appData.tasks);
-  const hist  = Object.values(appData.history);
-  const all   = [...tasks, ...hist];
-
-  document.getElementById('st-total').textContent    = all.length;
-  document.getElementById('st-complete').textContent = hist.length;
-
-  const dCount = hist.filter(t=>t.items.some(i=>i.assignTo==='Dinesh'||i.assignTo==='Both')).length;
-  const sCount = hist.filter(t=>t.items.some(i=>i.assignTo==='Sushmi'||i.assignTo==='Both')).length;
-  const total  = dCount + sCount || 1;
-  document.getElementById('bar-dinesh').style.width  = (dCount/total*100) + '%';
-  document.getElementById('bar-sushmi').style.width  = (sCount/total*100) + '%';
-  document.getElementById('val-dinesh').textContent  = dCount;
-  document.getElementById('val-sushmi').textContent  = sCount;
-
-  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const dayCounts = [0,0,0,0,0,0,0];
-  hist.forEach(t => dayCounts[new Date(t.completedAt).getDay()]++);
-  const maxDay = Math.max(...dayCounts, 1);
-  const colors = ['#FF6B6B','#4ECDC4','#667eea','#f093fb','#FFE66D','#ff8e53','#a8dadc'];
-  document.getElementById('day-chart').innerHTML = dayCounts.map((cnt,i) => `
-    <div class="chart-bar-row">
-      <span class="chart-bar-label">${dayNames[i]}</span>
-      <div class="chart-bar-track">
-        <div class="chart-bar-fill" style="width:${cnt/maxDay*100}%;background:${colors[i]}">
-          ${cnt>0?`<span>${cnt}</span>`:''}
-        </div>
-      </div>
-    </div>`).join('');
-
-  const insEl = document.getElementById('insights-container');
-  if (hist.length === 0) {
-    insEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🔮</div>
-      <p>No insights yet</p><span>Complete some tasks to see insights!</span></div>`;
-    return;
-  }
-
-  const insights = [];
-  if      (dCount > sCount) insights.push({icon:'💪',title:'Dinesh is on fire!',        text:`${dCount} tasks done vs Sushmi's ${sCount}`});
-  else if (sCount > dCount) insights.push({icon:'⭐',title:'Sushmi is leading!',         text:`${sCount} tasks done vs Dinesh's ${dCount}`});
-  else                      insights.push({icon:'🤝',title:'Perfect teamwork!',          text:'Both completed equal tasks - great balance!'});
-
-  const busyDay = dayCounts.indexOf(Math.max(...dayCounts));
-  if (dayCounts[busyDay]>0) insights.push({icon:'📅',title:`Busiest day: ${dayNames[busyDay]}`,text:`Most tasks completed on ${dayNames[busyDay]}s`});
-
-  const avgItems = (hist.reduce((s,t)=>s+t.items.length,0)/hist.length).toFixed(1);
-  insights.push({icon:'📦',title:`Avg ${avgItems} items per task`,text:'Your task lists are nicely sized'});
-
-  const streak = getStreak(hist);
-  if (streak>1) insights.push({icon:'🔥',title:`${streak}-day streak!`,text:`Tasks completed ${streak} days in a row`});
-
-  insEl.innerHTML = insights.map(ins => `
-    <div class="insight-card">
-      <div class="insight-icon">${ins.icon}</div>
-      <div class="insight-text"><strong>${ins.title}</strong><span>${ins.text}</span></div>
-    </div>`).join('');
-}
-
-function getStreak(hist) {
-  const days = new Set(hist.map(t=>new Date(t.completedAt).toDateString()));
-  let s=0, d=new Date();
-  while(days.has(d.toDateString())){s++;d.setDate(d.getDate()-1);}
-  return s;
-}
-
-// -- UTILS --
-function fmtDate(iso) {
-  if (!iso) return '';
-  const d    = new Date(iso);
-  const diff = Math.floor((Date.now()-d)/86400000);
-  if (diff===0) return 'Today';
-  if (diff===1) return 'Yesterday';
-  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-}
-
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function updateBadge() {
-  const count = Object.keys(appData.tasks).length;
-  const badge = document.getElementById('assign-badge');
-  badge.textContent   = count;
-  badge.style.display = count > 0 ? 'flex' : 'none';
-}
+// save() is now a no-op; Firestore listeners keep data fresh
 
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// -- EDIT TASK --
-let editingTaskId  = null;
-let editRowCount   = 0;
-let editGlobalAssign = '';
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + tab).classList.add('active');
+  currentTab = tab;
 
-function openEditModal(taskId) {
-  const task = appData.tasks[taskId];
-  if (!task) return;
-  editingTaskId    = taskId;
-  editRowCount     = 0;
-  editGlobalAssign = '';
+  // FAB visibility
+  document.getElementById('fab').style.display = tab === 'stats' ? 'none' : 'flex';
 
-  // Clear tbody and populate with existing items
-  const tbody = document.getElementById('edit-items-tbody');
-  tbody.innerHTML = '';
-  task.items.forEach(item => addEditItemRow(item));
-
-  updateEditGlobalChips();
-  document.getElementById('edit-modal-overlay').classList.add('open');
+  if (tab === 'home') renderHome();
+  else if (tab === 'history') renderHistory();
+  else if (tab === 'likes') renderLikes();
+  else if (tab === 'future') renderFuture();
+  else if (tab === 'stats') renderStats();
 }
 
-function closeEditModal() {
-  document.getElementById('edit-modal-overlay').classList.remove('open');
-  editingTaskId = null;
+function openAddModal() {
+  if (currentTab === 'likes') { openLikesModal(); return; }
+  if (currentTab === 'future') { openFutureModal(); return; }
+
+  // home/history -> entry modal
+  const now = new Date();
+  document.getElementById('inp-datetime').value = toLocalISOString(now);
+  document.getElementById('inp-desc').value = '';
+  document.getElementById('inp-comment').value = '';
+  document.getElementById('modal-title').textContent = 'New Memory ✨';
+  renderCatChips('cat-chips', null);
+  openModal('entry-modal');
 }
 
-function closeEditModalOutside(e) {
-  if (e.target === document.getElementById('edit-modal-overlay')) closeEditModal();
+function toLocalISOString(d) {
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function setEditGlobalAssign(val) {
-  editGlobalAssign = val;
-  updateEditGlobalChips();
-  document.querySelectorAll('#edit-items-tbody .assign-select').forEach(sel => {
-    if (val) sel.value = val;
+function renderCatChips(containerId, selectedCat) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = data.categories.map(cat =>
+    `<div class="cat-chip ${selectedCat === cat ? 'selected' : ''}" onclick="selectChip(this,'${containerId}')">${getEmoji(cat)} ${cat}</div>`
+  ).join('');
+}
+
+function selectChip(el, containerId) {
+  document.querySelectorAll(`#${containerId} .cat-chip`).forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function getSelectedCat(containerId) {
+  const sel = document.querySelector(`#${containerId} .cat-chip.selected`);
+  return sel ? sel.textContent.trim().replace(/^[\S\u00A0]+\s/, '') : null;
+}
+
+async function saveEntry() {
+  const desc = document.getElementById('inp-desc').value.trim();
+  if (!desc) { showToast('Please add a description!'); return; }
+  const dt = document.getElementById('inp-datetime').value;
+  const comment = document.getElementById('inp-comment').value.trim();
+  const cat = getSelectedCat('cat-chips');
+
+  await fbAdd('entries', { id: Date.now(), desc, datetime: dt || toLocalISOString(new Date()), comment: comment || '', cat: cat || '' });
+  closeModal('entry-modal');
+  showToast('Memory saved 💕');
+}
+
+async function deleteEntry(id) {
+  if (!confirm('Delete this memory?')) return;
+  const e = data.entries.find(x => x.id === id);
+  if (e) await fbDelete('entries', e._docId);
+  showToast('Deleted');
+  const t = window.currentTab || 'home';
+  if (t === 'home') renderHome();
+  else if (t === 'history') renderHistory();
+}
+
+function editEntry(id) {
+  const e = data.entries.find(x => x.id === id);
+  if (!e) return;
+  editIndex = id;
+  document.getElementById('edit-desc').value = e.desc;
+  document.getElementById('edit-datetime').value = e.datetime;
+  document.getElementById('edit-comment').value = e.comment || '';
+  renderCatChips('edit-cat-chips', e.cat);
+  openModal('edit-modal');
+}
+
+async function updateEntry() {
+  const e = data.entries.find(x => x.id === editIndex);
+  if (!e) return;
+  const updated = {
+    desc: document.getElementById('edit-desc').value.trim() || e.desc,
+    datetime: document.getElementById('edit-datetime').value,
+    comment: document.getElementById('edit-comment').value.trim(),
+    cat: getSelectedCat('edit-cat-chips') || e.cat,
+    id: e.id
+  };
+  await fbUpdate('entries', e._docId, updated);
+  closeModal('edit-modal');
+  showToast('Updated 💕');
+  // Refresh whatever tab is visible
+  const t = window.currentTab || 'home';
+  if (t === 'home') renderHome();
+  else if (t === 'history') renderHistory();
+  else if (t === 'stats') renderStats();
+}
+
+// LIKES
+function openLikesModal() {
+  document.getElementById('inp-like-name').value = '';
+  document.getElementById('inp-like-loc').value = '';
+  openModal('likes-modal');
+}
+
+async function saveLike() {
+  const name = document.getElementById('inp-like-name').value.trim();
+  if (!name) { showToast('Please enter a name!'); return; }
+  const loc = document.getElementById('inp-like-loc').value.trim();
+  await fbAdd('likes', { id: Date.now(), name, loc: loc || '', datetime: toLocalISOString(new Date()) });
+  closeModal('likes-modal');
+  showToast('Added to Her Likes 💝');
+}
+
+async function deleteLike(id) {
+  if (!confirm('Remove this?')) return;
+  const l = data.likes.find(x => x.id === id);
+  if (l) await fbDelete('likes', l._docId);
+}
+
+// FUTURE
+function openFutureModal() {
+  editFutureIndex = null;
+  document.getElementById('inp-fut-desc').value = '';
+  document.getElementById('inp-fut-comment').value = '';
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById('inp-fut-datetime').value = toLocalISOString(tomorrow);
+  renderCatChips('fut-cat-chips', null);
+  openModal('future-modal');
+}
+
+async function saveFuture() {
+  const desc = document.getElementById('inp-fut-desc').value.trim();
+  if (!desc) { showToast('Please add a description!'); return; }
+  const dt = document.getElementById('inp-fut-datetime').value;
+  const comment = document.getElementById('inp-fut-comment').value.trim();
+  const cat = getSelectedCat('fut-cat-chips');
+  await fbAdd('future', { id: Date.now(), desc, datetime: dt, comment: comment || '', cat: cat || '' });
+  closeModal('future-modal');
+  showToast('Future plan saved 🌟');
+}
+
+async function deleteFuture(id) {
+  if (!confirm('Remove this plan?')) return;
+  const f = data.future.find(x => x.id === id);
+  if (f) await fbDelete('future', f._docId);
+}
+
+// CATEGORIES
+function openManageCategories() {
+  renderCatList();
+  openModal('cat-modal');
+}
+
+function renderCatList() {
+  document.getElementById('cat-list').innerHTML = data.categories.map((cat, i) =>
+    `<div class="cat-manage-item">
+      <span class="cat-manage-name">${getEmoji(cat)} ${cat}</span>
+      <button class="delete-btn" onclick="deleteCat(${i})">✕</button>
+    </div>`
+  ).join('');
+}
+
+async function addCategory() {
+  const val = document.getElementById('new-cat-input').value.trim();
+  if (!val) return;
+  if (data.categories.includes(val)) { showToast('Already exists!'); return; }
+  data.categories.push(val);
+  document.getElementById('new-cat-input').value = '';
+  await fbSaveCategories(data.categories);
+  renderCatList();
+}
+
+async function deleteCat(i) {
+  if (data.categories.length <= 1) { showToast('Need at least one category!'); return; }
+  data.categories.splice(i, 1);
+  await fbSaveCategories(data.categories);
+  renderCatList();
+}
+
+// MODAL HELPERS
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
   });
+});
+
+// RENDER FUNCTIONS
+function formatDate(dtStr) {
+  const d = new Date(dtStr);
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function updateEditGlobalChips() {
-  document.getElementById('edit-global-dinesh').classList.toggle('active', editGlobalAssign === 'Dinesh');
-  document.getElementById('edit-global-sushmi').classList.toggle('active', editGlobalAssign === 'Sushmi');
-  document.getElementById('edit-global-none').classList.toggle('active',   editGlobalAssign === '');
+function formatTime(dtStr) {
+  const d = new Date(dtStr);
+  return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 }
 
-function addEditItemRow(prefill) {
-  editRowCount++;
-  const tbody = document.getElementById('edit-items-tbody');
-  const tr    = document.createElement('tr');
-  tr.innerHTML = `
-    <td class="sno-cell">${editRowCount}</td>
-    <td><input type="text"   placeholder="e.g. Milk" class="item-name-input" value="${prefill ? esc(prefill.name) : ''}"></td>
-    <td><input type="number" placeholder="1" min="1"  class="item-qty-input" style="text-align:center" value="${prefill ? esc(prefill.qty) : ''}"></td>
-    <td>
-      <select class="item-unit-input">
-        <option>Pieces</option><option>Qty</option><option>Kg</option>
-        <option>Litre</option><option>Pack</option><option>Dozen</option>
-      </select>
-    </td>
-    <td>
-      <select class="assign-select">
-        <option value="Both">Both</option>
-        <option value="Dinesh">👨 Dinesh</option>
-        <option value="Sushmi">👩 Sushmi</option>
-      </select>
-    </td>
-    <td><button class="remove-row-btn" onclick="removeEditRow(this)">✕</button></td>
-  `;
-  // Set unit and assignTo from prefill
-  if (prefill) {
-    tr.querySelector('.item-unit-input').value = prefill.unit   || 'Pieces';
-    tr.querySelector('.assign-select').value   = prefill.assignTo || 'Both';
+function formatFull(dtStr) {
+  return formatDate(dtStr) + ' · ' + formatTime(dtStr);
+}
+
+function isToday(dtStr) {
+  const d = new Date(dtStr);
+  const now = new Date();
+  return d.toDateString() === now.toDateString();
+}
+
+function entryCard(e, futureMode = false) {
+  return `<div class="card ${futureMode ? 'future' : ''}">
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap;">
+      ${e.cat ? `<span class="card-category"><span class="cat-emoji">${getEmoji(e.cat)}</span>${e.cat}</span>` : ''}
+      ${futureMode ? `<span class="future-badge">Upcoming</span>` : ''}
+    </div>
+    <div class="card-desc">${e.desc}</div>
+    ${e.comment ? `<div class="card-comment">"${e.comment}"</div>` : ''}
+    <div class="card-meta">🕐 ${formatFull(e.datetime)}</div>
+    <div class="card-actions">
+      ${!futureMode ? `<button class="icon-btn" onclick="editEntry(${e.id})">✏️</button>` : ''}
+      <button class="icon-btn" onclick="${futureMode ? 'deleteFuture' : 'deleteEntry'}(${e.id})">🗑️</button>
+    </div>
+  </div>`;
+}
+
+function getDaysSinceLastEntry() {
+  if (data.entries.length === 0) return null;
+  // Find the most recent entry across all history
+  const latest = data.entries.reduce((a, b) =>
+    new Date(a.datetime) > new Date(b.datetime) ? a : b
+  );
+  const lastDate = new Date(latest.datetime);
+  const today = new Date();
+  lastDate.setHours(0,0,0,0);
+  today.setHours(0,0,0,0);
+  return Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+}
+
+function loveBanner() {
+  const days = getDaysSinceLastEntry();
+  if (days === null) return ''; // no entries at all
+  if (days === 0) return ''; // has entry today — no nudge needed
+
+  let msg = '', emoji = '', color = '';
+  if (days === 1) {
+    msg = "Yesterday was the last time. Show some love today! 💕";
+    emoji = '💛'; color = '#f59e0b';
+  } else if (days <= 3) {
+    msg = `It's been ${days} days since your last memory.`;
+    emoji = '🧡'; color = '#f97316';
+  } else if (days <= 7) {
+    msg = `Been ${days} days since you showed your love 💕`;
+    emoji = '❤️'; color = '#e8526a';
+  } else {
+    msg = `It's been ${days} days! She deserves some love today 💝`;
+    emoji = '💔'; color = '#c73a52';
   }
-  tbody.appendChild(tr);
-  if (!prefill) tr.querySelector('.item-name-input').focus();
+
+  return `<div style="
+    background: white;
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 4px 16px rgba(232,82,106,0.12);
+    border-left: 4px solid ${color};
+  ">
+    <span style="font-size:26px">${emoji}</span>
+    <div>
+      <div style="font-size:13px; font-weight:600; color:${color}; margin-bottom:2px;">Reminder</div>
+      <div style="font-size:14px; color: var(--text); line-height:1.4;">${msg}</div>
+    </div>
+  </div>`;
 }
 
-function removeEditRow(btn) {
-  btn.closest('tr').remove();
-  document.querySelectorAll('#edit-items-tbody tr').forEach((row, i) => {
-    row.querySelector('.sno-cell').textContent = i + 1;
+function renderHome() {
+  const today = data.entries.filter(e => isToday(e.datetime));
+  const sorted = [...today].sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
+  const el = document.getElementById('home-content');
+  const banner = loveBanner();
+
+  if (sorted.length === 0) {
+    el.innerHTML = banner + `<div class="empty">
+      <div class="empty-icon">💕</div>
+      <div class="empty-title">Start your love story today</div>
+      <p>Tap <strong>+</strong> to add your first memory</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = banner +
+    `<div class="date-divider"><span>Today — ${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</span></div>
+    ${sorted.map(e => entryCard(e)).join('')}`;
+}
+
+function renderHistory() {
+  // Build month list
+  const allSorted = [...data.entries].sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
+
+  const months = [];
+  const monthSet = new Set();
+  allSorted.forEach(e => {
+    const d = new Date(e.datetime);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if (!monthSet.has(key)) { monthSet.add(key); months.push(key); }
   });
-  editRowCount = document.querySelectorAll('#edit-items-tbody tr').length;
+
+  const tabsEl = document.getElementById('month-tabs');
+  tabsEl.innerHTML = '<button class="month-tab active" onclick="filterHistoryMonth(\'all\', this)">All</button>' +
+    months.map(m => {
+      const [y, mo] = m.split('-');
+      const label = new Date(y, mo-1).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+      return `<button class="month-tab" onclick="filterHistoryMonth('${m}', this)">${label}</button>`;
+    }).join('');
+
+  renderHistoryEntries('all');
 }
 
-function submitEditTask() {
-  if (!editingTaskId) return;
-  const rows  = document.querySelectorAll('#edit-items-tbody tr');
-  const items = [];
-  let valid   = true;
+function filterHistoryMonth(key, el) {
+  document.querySelectorAll('#month-tabs .month-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderHistoryEntries(key);
+}
 
-  rows.forEach(row => {
-    const nameEl = row.querySelector('.item-name-input');
-    const name   = nameEl.value.trim();
-    if (!name) {
-      valid = false;
-      nameEl.style.borderColor = 'var(--coral)';
-      nameEl.addEventListener('input', () => nameEl.style.borderColor = '', { once: true });
-      return;
+function renderHistoryEntries(key) {
+  let entries = [...data.entries].sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
+  if (key !== 'all') {
+    entries = entries.filter(e => {
+      const d = new Date(e.datetime);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === key;
+    });
+  }
+
+  const el = document.getElementById('history-content');
+  if (entries.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📖</div><div class="empty-title">No entries here yet</div></div>`;
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  entries.forEach(e => {
+    const day = formatDate(e.datetime);
+    if (!groups[day]) groups[day] = [];
+    groups[day].push(e);
+  });
+
+  el.innerHTML = Object.entries(groups).map(([day, items]) =>
+    `<div class="date-divider"><span>${day}</span></div>` + items.map(e => entryCard(e)).join('')
+  ).join('');
+}
+
+function renderLikes() {
+  const el = document.getElementById('likes-content');
+  if (data.likes.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">💝</div><div class="empty-title">Nothing here yet</div><p>Tap + to add things she loves</p></div>`;
+    return;
+  }
+  el.innerHTML = data.likes.sort((a,b) => b.id - a.id).map(l =>
+    `<div class="likes-card">
+      <div class="likes-icon">❤️</div>
+      <div class="likes-info">
+        <div class="likes-name">${l.name}</div>
+        ${l.loc ? `<div class="likes-loc">📍 ${l.loc}</div>` : ''}
+        <div class="card-meta" style="margin-top:4px">🕐 ${formatFull(l.datetime)}</div>
+      </div>
+      <button class="icon-btn" onclick="deleteLike(${l.id})">🗑️</button>
+    </div>`
+  ).join('');
+}
+
+function renderFuture() {
+  const el = document.getElementById('future-content');
+  const upcoming = [...data.future]
+    .filter(e => new Date(e.datetime) > new Date())
+    .sort((a,b) => new Date(a.datetime) - new Date(b.datetime));
+  const past = [...data.future]
+    .filter(e => new Date(e.datetime) <= new Date())
+    .sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
+
+  let html = '';
+  if (upcoming.length === 0 && past.length === 0) {
+    html = `<div class="empty"><div class="empty-icon">🌟</div><div class="empty-title">Dream a little</div><p>Tap + to add future plans</p></div>`;
+  } else {
+    if (upcoming.length) html += upcoming.map(e => entryCard(e, true)).join('');
+    if (past.length) {
+      html += `<div class="date-divider"><span>Past Plans</span></div>`;
+      html += past.map(e => entryCard(e, true)).join('');
     }
-    const qty      = row.querySelector('.item-qty-input').value  || '1';
-    const unit     = row.querySelector('.item-unit-input').value;
-    const assignTo = row.querySelector('.assign-select').value   || 'Both';
-    items.push({ name, qty, unit, assignTo });
+  }
+  el.innerHTML = html;
+}
+
+function renderStats() {
+  const el = document.getElementById('stats-content');
+  const total = data.entries.length;
+  const todayCount = data.entries.filter(e => isToday(e.datetime)).length;
+
+  // Category counts
+  const catCounts = {};
+  data.entries.forEach(e => {
+    if (e.cat) catCounts[e.cat] = (catCounts[e.cat] || 0) + 1;
   });
+  const maxCat = Math.max(...Object.values(catCounts), 1);
+  const topCat = Object.entries(catCounts).sort((a,b) => b[1] - a[1])[0];
 
-  if (!valid)             { showToast('Please fill all item names'); return; }
-  if (items.length === 0) { showToast('Add at least one item');      return; }
+  // Monthly counts (last 6 months)
+  const monthStats = {};
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleDateString('en-IN', { month: 'short' });
+    monthStats[key] = { label, count: 0 };
+  }
+  data.entries.forEach(e => {
+    const d = new Date(e.datetime);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if (monthStats[key]) monthStats[key].count++;
+  });
+  const maxMonth = Math.max(...Object.values(monthStats).map(m => m.count), 1);
 
-  // Update the task in appData
-  const task    = appData.tasks[editingTaskId];
-  const allNames = items.map(i => i.name).join(', ');
-  task.items    = items;
-  task.title    = allNames.length > 42 ? allNames.substring(0, 42) + '...' : allNames;
-  task.updatedAt = new Date().toISOString();
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-num">${total}</span>
+        <span class="stat-label">Total Memories</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">${todayCount}</span>
+        <span class="stat-label">Today</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">${data.likes.length}</span>
+        <span class="stat-label">Her Likes</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num">${data.future.filter(e => new Date(e.datetime) > new Date()).length}</span>
+        <span class="stat-label">Upcoming</span>
+      </div>
+    </div>
 
-  saveLocal();
-  renderAll();
-  fbSaveTask(editingTaskId, task);  // sync to Firebase
+    <div class="section-title">By Category</div>
+    ${Object.entries(catCounts).length === 0 ? '<p style="color:var(--text-soft);font-size:14px">No data yet</p>' :
+      Object.entries(catCounts).sort((a,b) => b[1]-a[1]).map(([cat, count]) =>
+        `<div class="chart-bar-wrap">
+          <div class="chart-bar-label"><span>${getEmoji(cat)} ${cat}</span><span>${count}</span></div>
+          <div class="chart-bar-track">
+            <div class="chart-bar-fill" style="width:${Math.round(count/maxCat*100)}%"></div>
+          </div>
+        </div>`
+      ).join('')
+    }
 
-  closeEditModal();
-  showToast('✅ Task updated!');
+    <div class="section-title">Monthly Activity</div>
+    ${Object.values(monthStats).map(m =>
+      `<div class="chart-bar-wrap">
+        <div class="chart-bar-label"><span>${m.label}</span><span>${m.count}</span></div>
+        <div class="chart-bar-track">
+          <div class="chart-bar-fill" style="width:${Math.round(m.count/maxMonth*100)}%"></div>
+        </div>
+      </div>`
+    ).join('')}
+    ${topCat ? `<div style="margin-top:20px; padding:16px; background:white; border-radius:18px; text-align:center; box-shadow:var(--shadow)">
+      <div style="font-size:28px; margin-bottom:4px">${getEmoji(topCat[0])}</div>
+      <div style="font-family:'Playfair Display',serif; font-style:italic; color:var(--rose); font-size:16px">Most memorable</div>
+      <div style="font-size:20px; font-weight:600; color:var(--text)">${topCat[0]}</div>
+      <div style="font-size:13px; color:var(--text-soft)">${topCat[1]} times</div>
+    </div>` : ''}
+  `;
 }
 
-// -- INIT --
-updateGreeting();
-loadLocal();
-renderAll();
-initFirebase(); // connects to Firebase if keys are configured above
+// ---- PIN AUTH ----
+let _pinEntry = '';
+let _pinMode = 'enter'; // 'enter' | 'set' | 'confirm'
+let _pinFirst = '';
 
-// -- iOS INSTALL BANNER --
-function isIOS() {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-function isInStandaloneMode() {
-  return ('standalone' in navigator && navigator.standalone) ||
-    window.matchMedia('(display-mode: standalone)').matches;
-}
-function dismissIOSBanner() {
-  document.getElementById('ios-install-banner').classList.remove('show');
-  try { localStorage.setItem('hf_ios_dismissed', '1'); } catch(e) {}
-}
-// Show banner on iOS Safari only if not already installed and not dismissed
-if (isIOS() && !isInStandaloneMode()) {
-  const dismissed = localStorage.getItem('hf_ios_dismissed');
-  if (!dismissed) {
-    // Small delay so page loads first
-    setTimeout(() => {
-      document.getElementById('ios-install-banner').classList.add('show');
-    }, 1500);
+function pinUpdateDots() {
+  for (let i = 0; i < 6; i++) {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.toggle('filled', i < _pinEntry.length);
+    dot.classList.remove('error');
   }
 }
 
+function pinShakeError(msg) {
+  document.getElementById('pin-error').textContent = msg;
+  for (let i = 0; i < 6; i++) {
+    const dot = document.getElementById('dot-' + i);
+    dot.classList.remove('filled');
+    dot.classList.add('error');
+  }
+  setTimeout(() => {
+    for (let i = 0; i < 6; i++) document.getElementById('dot-' + i).classList.remove('error');
+    _pinEntry = '';
+    pinUpdateDots();
+  }, 600);
+}
+
+function pinPress(digit) {
+  if (_pinEntry.length >= 6) return;
+  _pinEntry += digit;
+  pinUpdateDots();
+  if (_pinEntry.length === 6) setTimeout(pinSubmit, 150);
+}
+
+function pinDelete() {
+  _pinEntry = _pinEntry.slice(0, -1);
+  pinUpdateDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function pinSubmit() {
+  const savedPin = localStorage.getItem('lt_pin');
+
+  if (_pinMode === 'enter') {
+    // Verify existing PIN
+    if (_pinEntry === savedPin) {
+      pinSuccess(_pinEntry);
+    } else {
+      pinShakeError('Wrong PIN. Try again.');
+    }
+
+  } else if (_pinMode === 'set') {
+    // First step of creating new PIN
+    _pinFirst = _pinEntry;
+    _pinMode = 'confirm';
+    _pinEntry = '';
+    document.getElementById('pin-title').textContent = 'Confirm your PIN';
+    document.getElementById('pin-subtitle').textContent = 'Enter the same PIN again';
+    document.getElementById('pin-error').textContent = '';
+    pinUpdateDots();
+
+  } else if (_pinMode === 'confirm') {
+    // Second step — confirm matches first
+    if (_pinEntry === _pinFirst) {
+      localStorage.setItem('lt_pin', _pinEntry);
+      pinSuccess(_pinEntry);
+    } else {
+      _pinMode = 'set';
+      _pinFirst = '';
+      pinShakeError("PINs don't match. Try again.");
+      setTimeout(() => {
+        document.getElementById('pin-title').textContent = 'Create your PIN';
+        document.getElementById('pin-subtitle').textContent = 'Enter a new 6-digit PIN';
+      }, 700);
+    }
+  }
+}
+
+function pinSuccess(pin) {
+  const userId = 'u_' + btoa(pin).replace(/=/g, '');
+  window._userId = userId;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'block';
+
+  if (!window._db) {
+    showToast('Firebase not loaded! Check internet connection.');
+    return;
+  }
+
+  initFirestoreSync();
+  renderHome();
+  showToast('Connected 💕');
+}
+
+function handleSignOut() {
+  if (!confirm('Lock the app? You\'ll need your PIN to get back in.')) return;
+  _unsubscribers.forEach(u => u());
+  _unsubscribers = [];
+  data = { entries: [], likes: [], future: [], categories: ['Food','Gift','Movie','Place','Sex','Argument','Date','Trip'] };
+  window._userId = null;
+  _pinEntry = '';
+  _pinMode = 'enter';
+  const savedPin = localStorage.getItem('lt_pin');
+  document.getElementById('pin-title').textContent = 'Enter your 6-digit PIN';
+  document.getElementById('pin-subtitle').textContent = 'Same PIN on all your devices';
+  document.getElementById('pin-error').textContent = '';
+  pinUpdateDots();
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-shell').style.display = 'none';
+}
+
+// ---- INIT ----
+window.currentTab = currentTab;
+const _origSwitchTab = switchTab;
+switchTab = function(tab, el) {
+  window.currentTab = tab;
+  currentTab = tab;
+  _origSwitchTab(tab, el);
+};
+
+// Set correct PIN mode immediately (no DOMContentLoaded needed — script runs after DOM)
+(function initPIN() {
+  const savedPin = localStorage.getItem('lt_pin');
+  if (savedPin) {
+    _pinMode = 'enter';
+    document.getElementById('pin-title').textContent = 'Enter your PIN';
+    document.getElementById('pin-subtitle').textContent = 'Welcome back 💕';
+  } else {
+    _pinMode = 'set';
+    document.getElementById('pin-title').textContent = 'Create your PIN';
+    document.getElementById('pin-subtitle').textContent = 'Set a 6-digit PIN to protect your memories';
+  }
+})();
+
+// Register Service Worker
 if ('serviceWorker' in navigator) {
-  // Listen for SW telling us caches are cleared — then reload to get fresh files
-  navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data === 'reload') window.location.reload(true);
-  });
-  navigator.serviceWorker.register('sw.js').then(reg => {
-    // If a new SW is waiting, activate it immediately
-    if (reg.waiting) reg.waiting.postMessage('skipWaiting');
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.log('SW error:', err));
   });
 }
+
+// PWA Install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 3 seconds if not dismissed
+  setTimeout(() => {
+    if (deferredPrompt) showInstallBanner();
+  }, 3000);
+});
+
+function showInstallBanner() {
+  const banner = document.createElement('div');
+  banner.id = 'install-banner';
+  banner.style.cssText = `
+    position:fixed; bottom:calc(var(--tab-h) + 80px); left:16px; right:16px;
+    background:white; border-radius:16px; padding:14px 16px;
+    box-shadow:0 8px 32px rgba(232,82,106,0.25);
+    border:1px solid rgba(232,82,106,0.15);
+    display:flex; align-items:center; gap:12px; z-index:500;
+    animation: fadeUp 0.3s ease;
+  `;
+  banner.innerHTML = `
+    <span style="font-size:28px">💕</span>
+    <div style="flex:1">
+      <div style="font-weight:600;font-size:14px;color:#2d1f1f">Install Love Today</div>
+      <div style="font-size:12px;color:#8c6b6b">Add to your home screen</div>
+    </div>
+    <button onclick="installApp()" style="background:#e8526a;color:white;border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer">Install</button>
+    <button onclick="document.getElementById('install-banner').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#8c6b6b;padding:4px">✕</button>
+  `;
+  document.body.appendChild(banner);
+}
+
+async function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('install-banner')?.remove();
+  if (outcome === 'accepted') showToast('App installed! 💕');
+}
+
+window.addEventListener('appinstalled', () => {
+  showToast('Love Today installed! 💕');
+  deferredPrompt = null;
+});
 </script>
 </body>
 </html>
