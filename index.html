@@ -410,6 +410,56 @@
     .fab { right: calc(50% - 280px); }
   }
 
+  /* Event card */
+  .event-card {
+    background: var(--card); border-radius: var(--radius-sm);
+    box-shadow: var(--shadow); margin-bottom: 10px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer; transition: transform 0.15s;
+  }
+  .event-card:hover { transform: translateY(-2px); }
+  .event-countdown {
+    min-width: 52px; height: 52px; border-radius: 14px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--coral), #ff8e53);
+    color: white; flex-shrink: 0;
+  }
+  .event-countdown .days-num { font-size: 20px; font-weight: 900; line-height: 1; }
+  .event-countdown .days-lbl { font-size: 9px; font-weight: 800; opacity: 0.9; text-transform:uppercase; }
+  .event-countdown.today { background: linear-gradient(135deg,#27ae60,#2ecc71); }
+  .event-countdown.soon  { background: linear-gradient(135deg,#f39c12,#e67e22); }
+  .event-info { flex: 1; min-width: 0; }
+  .event-info strong { font-size: 14px; font-weight: 800; display: block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .event-info .event-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .event-actions { display: flex; gap: 6px; }
+  .btn-icon {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 8px; width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-icon:hover { border-color: var(--coral); background: #fff5f5; }
+  .btn-icon.delete:hover { border-color: #e74c3c; background: #fff0f0; }
+  .btn-icon.revert:hover { border-color: #27ae60; background: #f0fff4; }
+
+  /* Delete button in assign/history */
+  .btn-delete {
+    padding: 10px 12px; background: #fff0f0;
+    border: 1.5px solid #ffd5d5; border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+    color: #e74c3c; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-delete:hover { background: #ffe0e0; border-color: #e74c3c; }
+
+  /* Revert button in history */
+  .btn-revert {
+    padding: 10px 12px; background: #f0fff4;
+    border: 1.5px solid #c3e6cb; border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+    color: #27ae60; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-revert:hover { background: #d4edda; border-color: #27ae60; }
+
   /* iOS Install Banner */
   .ios-install-banner {
     display: none;
@@ -477,6 +527,10 @@
   <button class="tab-btn" id="tab-history" onclick="showPage('history')">
     <span class="tab-icon">📜</span>History
   </button>
+  <button class="tab-btn" id="tab-events" onclick="showPage('events')">
+    <span class="tab-icon">🗓️</span>Events
+    <span class="tab-badge" id="events-badge" style="display:none"></span>
+  </button>
   <button class="tab-btn" id="tab-stats" onclick="showPage('stats')">
     <span class="tab-icon">📊</span>Stats
   </button>
@@ -510,7 +564,11 @@
       <div class="stat-label">Completed</div>
     </div>
   </div>
-  <div class="section-title">Recent Tasks</div>
+  <div class="section-title">Upcoming Events 🗓️</div>
+  <div id="home-events-list" style="margin-bottom:20px">
+    <div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">No upcoming events in next 30 days</div>
+  </div>
+  <div class="section-title">Pending Tasks</div>
   <div class="recent-list" id="home-recent-list">
     <div class="empty-state">
       <div class="empty-icon">🛒</div>
@@ -543,6 +601,17 @@
       <div class="empty-icon">📜</div>
       <p>No history yet</p>
       <span>Completed tasks will appear here</span>
+    </div>
+  </div>
+</div>
+
+<!-- EVENTS PAGE -->
+<div class="page" id="page-events">
+  <div id="events-list">
+    <div class="empty-state">
+      <div class="empty-icon">🗓️</div>
+      <p>No events yet!</p>
+      <span>Tap + to add an upcoming event</span>
     </div>
   </div>
 </div>
@@ -581,6 +650,44 @@
   <div class="section-title">Insights 💡</div>
   <div id="insights-container">
     <div class="empty-state"><div class="empty-icon">🔮</div><p>No insights yet</p><span>Complete some tasks to see insights!</span></div>
+  </div>
+</div>
+
+<!-- ADD/EDIT EVENT MODAL -->
+<div class="modal-overlay" id="event-modal-overlay" onclick="closeEventModalOutside(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="event-modal-title">🗓️ Add Event</span>
+      <button class="modal-close" onclick="closeEventModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:14px;padding-bottom:8px">
+        <div>
+          <label style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Event Name *</label>
+          <input type="text" id="event-name-input" placeholder="e.g. Diwali, Anniversary, Doctor visit"
+            style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Date *</label>
+          <input type="date" id="event-date-input"
+            style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Location</label>
+          <input type="text" id="event-location-input" placeholder="e.g. Home, Hospital, Chennai"
+            style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Note (optional)</label>
+          <input type="text" id="event-note-input" placeholder="Any additional details..."
+            style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" id="event-submit-btn" onclick="submitEvent()">🗓️ Save Event</button>
+    </div>
   </div>
 </div>
 
@@ -651,7 +758,7 @@
 </div>
 
 <!-- FAB -->
-<button class="fab" id="fab-btn" onclick="openModal()">+</button>
+<button class="fab" id="fab-btn" onclick="onFabClick()">+</button>
 
 <!-- ADD TASK MODAL -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
@@ -701,13 +808,12 @@
 // ==============================================================
 // STEP 1: Paste each value from Firebase Project Settings below
 // ==============================================================
-  const FIREBASE_API_KEY        = "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk";
-const FIREBASE_AUTH_DOMAIN    = "happyfamily-e4f68.firebaseapp.com";
-const FIREBASE_PROJECT_ID     = "happyfamily-e4f68";
-const FIREBASE_STORAGE_BUCKET = "happyfamily-e4f68.firebasestorage.app";
-const FIREBASE_MESSAGING_ID   = "740546226739";
-const FIREBASE_APP_ID         = "1:740546226739:web:8247b42ed7b059fe5a9146";
-
+const HF_KEY        = "PASTE_apiKey_HERE";
+const HF_AUTH    = "PASTE_authDomain_HERE";
+const HF_PROJECT     = "PASTE_projectId_HERE";
+const HF_BUCKET = "PASTE_storageBucket_HERE";
+const HF_MSGID   = "PASTE_messagingSenderId_HERE";
+const HF_APPID         = "PASTE_appId_HERE";
 
 // ==============================================================
 // STEP 2: Paste your Realtime Database URL below
@@ -715,7 +821,7 @@ const FIREBASE_APP_ID         = "1:740546226739:web:8247b42ed7b059fe5a9146";
 // Your project URL is:
 // https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
 // ==============================================================
-const FIREBASE_DB_URL         = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
+const HF_DBURL = "PASTE_databaseURL_HERE";
 
 // (Do not edit below this line)
 const HF_CONFIG = {
@@ -775,18 +881,44 @@ function initFirebase() {
     _remove = remove;
 
     // -- REAL-TIME LISTENER --
-    // This fires immediately with current data, then again on EVERY change
-    // from ANY device - web or mobile. This is the only way data flows IN.
     onValue(_ref(_db, 'happyfamily'), (snap) => {
       const d = snap.val() || {};
-      appData.tasks   = d.tasks   || {};
-      appData.history = d.history || {};
-      saveLocal();
-      renderAll();
+      const fbTasks   = d.tasks   || {};
+      const fbHistory = d.history || {};
+      const fbEvents  = d.events  || {};
+
       if (!fbReady) {
+        // First connect: if Firebase is empty but we have local data, push local up
+        const hasFirebaseData = Object.keys(fbTasks).length > 0 ||
+                                Object.keys(fbHistory).length > 0 ||
+                                Object.keys(fbEvents).length > 0;
+        if (!hasFirebaseData) {
+          // Firebase empty — push our local data up so it isn't lost
+          const hasLocalData = Object.keys(appData.tasks).length > 0 ||
+                               Object.keys(appData.history).length > 0 ||
+                               Object.keys(appData.events || {}).length > 0;
+          if (hasLocalData) {
+            _set(_ref(_db, 'happyfamily'), {
+              tasks  : appData.tasks,
+              history: appData.history,
+              events : appData.events || {}
+            }).catch(()=>{});
+            // Keep local data as-is, don't overwrite with empty Firebase
+            fbReady = true;
+            setSyncStatus('live');
+            return;
+          }
+        }
         fbReady = true;
         setSyncStatus('live');
       }
+
+      // Firebase has data — use it as source of truth
+      appData.tasks   = fbTasks;
+      appData.history = fbHistory;
+      appData.events  = fbEvents;
+      saveLocal();
+      renderAll();
     }, (err) => {
       console.error('Firebase read error:', err);
       setSyncStatus('error');
@@ -812,6 +944,18 @@ function fbSaveHistory(id, obj) {
   if (!fbReady) return;
   _set(_ref(_db, 'happyfamily/history/' + id), obj).catch(e => console.error('fbSaveHistory:', e));
 }
+function fbDeleteHistory(id) {
+  if (!fbReady) return;
+  _remove(_ref(_db, 'happyfamily/history/' + id)).catch(e => console.error('fbDeleteHistory:', e));
+}
+function fbSaveEvent(id, obj) {
+  if (!fbReady) return;
+  _set(_ref(_db, 'happyfamily/events/' + id), obj).catch(e => console.error('fbSaveEvent:', e));
+}
+function fbDeleteEvent(id) {
+  if (!fbReady) return;
+  _remove(_ref(_db, 'happyfamily/events/' + id)).catch(e => console.error('fbDeleteEvent:', e));
+}
 
 // -- LOCAL STORAGE --
 function saveLocal() {
@@ -819,9 +963,22 @@ function saveLocal() {
 }
 function loadLocal() {
   try {
-    const s = localStorage.getItem('hf_data');
-    if (s) { const d = JSON.parse(s); appData.tasks = d.tasks||{}; appData.history = d.history||{}; }
-  } catch(e) {}
+    // Try current key first
+    let s = localStorage.getItem('hf_data');
+
+    // Migrate from older keys if current key is empty
+    if (!s) s = localStorage.getItem('happyfamily_v2');
+    if (!s) s = localStorage.getItem('happyfamily');
+
+    if (s) {
+      const d = JSON.parse(s);
+      appData.tasks   = d.tasks   || {};
+      appData.history = d.history || {};
+      appData.events  = d.events  || {};
+      // Re-save under the current key so migration happens once
+      saveLocal();
+    }
+  } catch(e) { console.error('loadLocal error:', e); }
 }
 
 // -- TASK OPERATIONS --
@@ -875,10 +1032,21 @@ function showPage(name) {
   document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'stats') renderStats();
+  if (name === 'stats')   renderStats();
+  if (name === 'events')  renderEvents();
 }
 
 // -- MODAL --
+function onFabClick() {
+  // Open event modal on events page, task modal everywhere else
+  const activePage = document.querySelector('.page.active');
+  if (activePage && activePage.id === 'page-events') {
+    openEventModal();
+  } else {
+    openModal();
+  }
+}
+
 function openModal() {
   document.getElementById('modal-overlay').classList.add('open');
   document.getElementById('items-tbody').innerHTML = '';
@@ -993,6 +1161,7 @@ function renderAll() {
   renderHome();
   renderAssign();
   renderHistory();
+  renderEvents();
   updateBadge();
 }
 
@@ -1003,27 +1172,52 @@ function renderHome() {
   document.getElementById('qs-pending').textContent = tasks.length;
   document.getElementById('qs-done').textContent    = hist.length;
 
-  const list = document.getElementById('home-recent-list');
-  const all  = [...tasks, ...hist]
-    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5);
+  // Upcoming events (next 30 days)
+  const evEl = document.getElementById('home-events-list');
+  const now   = new Date(); now.setHours(0,0,0,0);
+  const in30  = new Date(now); in30.setDate(in30.getDate() + 30);
+  const upcoming = Object.values(appData.events || {})
+    .filter(e => { const d = new Date(e.date); return d >= now && d <= in30; })
+    .sort((a,b) => new Date(a.date) - new Date(b.date));
+  if (upcoming.length === 0) {
+    evEl.innerHTML = `<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;background:var(--card);border-radius:12px">No upcoming events in next 30 days</div>`;
+  } else {
+    evEl.innerHTML = upcoming.map(e => {
+      const diff = Math.round((new Date(e.date) - now) / 86400000);
+      const ccls = diff === 0 ? 'today' : diff <= 7 ? 'soon' : '';
+      const dlbl = diff === 0 ? 'Today' : diff === 1 ? 'Tmrw' : diff + 'd';
+      return `<div class="event-card" onclick="showPage('events')">
+        <div class="event-countdown ${ccls}">
+          <div class="days-num">${dlbl}</div>
+          ${diff > 1 ? '<div class="days-lbl">away</div>' : ''}
+        </div>
+        <div class="event-info">
+          <strong>${esc(e.name)}</strong>
+          <div class="event-meta">${e.location ? '📍 ' + esc(e.location) + ' · ' : ''}${new Date(e.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+          ${e.note ? `<div class="event-meta" style="margin-top:2px">📝 ${esc(e.note)}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
 
-  if (all.length === 0) {
+  // Pending tasks only
+  const list = document.getElementById('home-recent-list');
+  const pending = tasks.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  if (pending.length === 0) {
     list.innerHTML = `<div class="empty-state">
       <div class="empty-icon">🛒</div>
-      <p>No tasks yet!</p><span>Tap + to add your first task</span>
+      <p>No pending tasks!</p><span>Tap + to add your first task</span>
     </div>`;
     return;
   }
-
-  list.innerHTML = all.map(t => {
+  list.innerHTML = pending.map(t => {
     const persons  = [...new Set(t.items.map(i => i.assignTo))];
     const tagClass = (persons.includes('Both') || persons.length > 1)
       ? 'both' : persons[0]?.toLowerCase() || 'both';
     const tagText  = tagClass === 'both' ? '👨👩 Both'
       : tagClass === 'dinesh' ? '👨 Dinesh' : '👩 Sushmi';
-    return `<div class="recent-item" style="${t.status==='done'?'opacity:0.6':''}">
-      <div class="recent-item-icon">${t.status==='done'?'✅':'🛒'}</div>
+    return `<div class="recent-item" style="cursor:pointer" onclick="openTaskFromHome('${t.id}')">
+      <div class="recent-item-icon">🛒</div>
       <div class="recent-item-info">
         <strong>${esc(t.title || 'Task list')}</strong>
         <span>${t.items.length} item${t.items.length!==1?'s':''} · ${fmtDate(t.createdAt)}</span>
@@ -1087,6 +1281,7 @@ function renderAssign() {
       </div>
       <div class="task-card-actions">
         <button class="btn-edit" onclick="openEditModal('${task.id}')">✏️ Edit</button>
+        <button class="btn-delete" onclick="deleteTask('${task.id}')">🗑️</button>
         <input type="text" class="comment-input"
           placeholder="💬 Optional comment..." id="comment-${task.id}">
         <button class="btn-complete" onclick="completeTask('${task.id}')">✓ Done</button>
@@ -1139,9 +1334,203 @@ function renderHistory() {
             <span style="font-size:12px;color:var(--muted);margin-left:auto">${fmtDate(t.completedAt)}</span>
           </div>
           ${t.comment ? `<div class="history-comment">💬 "${esc(t.comment)}"</div>` : ''}
+          <div style="display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+            <button class="btn-revert" onclick="revertTask('${t.id}')">↩️ Revert</button>
+            <button class="btn-delete" onclick="deleteHistory('${t.id}')">🗑️ Delete</button>
+          </div>
         </div>`;
       }).join('')}
     </div>`).join('');
+}
+
+// -- EVENTS PAGE --
+function renderEvents() {
+  const events = Object.values(appData.events || {})
+    .sort((a,b) => new Date(a.date) - new Date(b.date));
+  const list = document.getElementById('events-list');
+  const now  = new Date(); now.setHours(0,0,0,0);
+
+  if (events.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🗓️</div><p>No events yet!</p>
+      <span>Tap + to add an upcoming event</span>
+    </div>`;
+    return;
+  }
+
+  // Group: upcoming then past
+  const upcoming = events.filter(e => new Date(e.date) >= now);
+  const past     = events.filter(e => new Date(e.date) < now);
+
+  let html = '';
+  if (upcoming.length > 0) {
+    html += `<div class="section-title" style="margin-bottom:10px">Upcoming</div>`;
+    html += upcoming.map(e => eventCard(e, now)).join('');
+  }
+  if (past.length > 0) {
+    html += `<div class="section-title" style="margin-top:20px;margin-bottom:10px;opacity:0.6">Past</div>`;
+    html += past.map(e => eventCard(e, now)).join('');
+  }
+  list.innerHTML = html;
+}
+
+function eventCard(e, now) {
+  const diff = Math.round((new Date(e.date) - now) / 86400000);
+  const ccls = diff === 0 ? 'today' : diff > 0 && diff <= 7 ? 'soon' : '';
+  const dlbl = diff === 0 ? 'Today' : diff === 1 ? 'Tmrw' : diff < 0 ? Math.abs(diff)+'d ago' : diff+'d';
+  return `<div class="event-card">
+    <div class="event-countdown ${ccls}" style="${diff < 0 ? 'background:linear-gradient(135deg,#b2bec3,#636e72)' : ''}">
+      <div class="days-num" style="font-size:${dlbl.length > 4 ? '13px':'20px'}">${dlbl}</div>
+      ${diff > 1 ? '<div class="days-lbl">away</div>' : ''}
+    </div>
+    <div class="event-info">
+      <strong>${esc(e.name)}</strong>
+      <div class="event-meta">${new Date(e.date).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div>
+      ${e.location ? `<div class="event-meta">📍 ${esc(e.location)}</div>` : ''}
+      ${e.note     ? `<div class="event-meta">📝 ${esc(e.note)}</div>`     : ''}
+    </div>
+    <div class="event-actions">
+      <button class="btn-icon" onclick="openEditEventModal('${e.id}')" title="Edit">✏️</button>
+      <button class="btn-icon delete" onclick="deleteEvent('${e.id}')" title="Delete">🗑️</button>
+    </div>
+  </div>`;
+}
+
+// -- EVENT MODAL --
+let editingEventId = null;
+
+function openEventModal() {
+  editingEventId = null;
+  document.getElementById('event-modal-title').textContent = '🗓️ Add Event';
+  document.getElementById('event-submit-btn').textContent  = '🗓️ Save Event';
+  document.getElementById('event-name-input').value     = '';
+  document.getElementById('event-date-input').value     = '';
+  document.getElementById('event-location-input').value = '';
+  document.getElementById('event-note-input').value     = '';
+  document.getElementById('event-modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('event-name-input').focus(), 200);
+}
+
+function openEditEventModal(eventId) {
+  const ev = (appData.events || {})[eventId];
+  if (!ev) return;
+  editingEventId = eventId;
+  document.getElementById('event-modal-title').textContent = '✏️ Edit Event';
+  document.getElementById('event-submit-btn').textContent  = '💾 Update Event';
+  document.getElementById('event-name-input').value     = ev.name     || '';
+  document.getElementById('event-date-input').value     = ev.date     || '';
+  document.getElementById('event-location-input').value = ev.location || '';
+  document.getElementById('event-note-input').value     = ev.note     || '';
+  document.getElementById('event-modal-overlay').classList.add('open');
+}
+
+function closeEventModal() {
+  document.getElementById('event-modal-overlay').classList.remove('open');
+  editingEventId = null;
+}
+function closeEventModalOutside(e) {
+  if (e.target === document.getElementById('event-modal-overlay')) closeEventModal();
+}
+
+function submitEvent() {
+  const name = document.getElementById('event-name-input').value.trim();
+  const date = document.getElementById('event-date-input').value;
+  if (!name) { showToast('Please enter an event name'); return; }
+  if (!date) { showToast('Please select a date');       return; }
+
+  const evObj = {
+    name,
+    date,
+    location : document.getElementById('event-location-input').value.trim(),
+    note     : document.getElementById('event-note-input').value.trim(),
+  };
+
+  if (!appData.events) appData.events = {};
+
+  if (editingEventId) {
+    evObj.id = editingEventId;
+    appData.events[editingEventId] = evObj;
+    fbSaveEvent(editingEventId, evObj);
+    showToast('✅ Event updated!');
+  } else {
+    const id = 'ev_' + Date.now();
+    evObj.id = id;
+    appData.events[id] = evObj;
+    fbSaveEvent(id, evObj);
+    showToast('🗓️ Event added!');
+  }
+
+  saveLocal();
+  renderAll();
+  closeEventModal();
+}
+
+function deleteEvent(eventId) {
+  if (!confirm('Delete this event?')) return;
+  delete appData.events[eventId];
+  saveLocal();
+  fbDeleteEvent(eventId);
+  renderAll();
+  showToast('🗑️ Event deleted');
+}
+
+// -- DELETE TASK (from Assign) --
+function deleteTask(taskId) {
+  if (!confirm('Delete this task permanently?')) return;
+  delete appData.tasks[taskId];
+  saveLocal();
+  fbDeleteTask(taskId);
+  renderAll();
+  showToast('🗑️ Task deleted');
+}
+
+// -- DELETE HISTORY --
+function deleteHistory(histId) {
+  if (!confirm('Delete this history entry?')) return;
+  delete appData.history[histId];
+  saveLocal();
+  fbDeleteHistory(histId);
+  renderAll();
+  showToast('🗑️ Entry deleted');
+}
+
+// -- REVERT TASK (from History back to Assign) --
+function revertTask(histId) {
+  if (!confirm('Move this back to pending tasks?')) return;
+  const task = appData.history[histId];
+  if (!task) return;
+  // Reset status fields
+  delete task.completedAt;
+  delete task.comment;
+  task.status = 'pending';
+  // Move to tasks
+  const newId = 'task_' + Date.now();
+  task.id = newId;
+  appData.tasks[newId] = task;
+  delete appData.history[histId];
+  saveLocal();
+  fbSaveTask(newId, task);
+  fbDeleteHistory(histId);
+  renderAll();
+  showToast('↩️ Task moved back to pending!');
+}
+
+// -- OPEN TASK FROM HOME SCREEN --
+function openTaskFromHome(taskId) {
+  showPage('assign');
+  // Highlight the task card briefly after navigation
+  setTimeout(() => {
+    const card = document.querySelector(`[onclick*="${taskId}"]`);
+    if (card) {
+      const taskCard = card.closest('.task-card');
+      if (taskCard) {
+        taskCard.style.transition = 'box-shadow 0.3s';
+        taskCard.style.boxShadow  = '0 0 0 3px var(--coral)';
+        taskCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => taskCard.style.boxShadow = '', 1500);
+      }
+    }
+  }, 150);
 }
 
 // -- STATS --
@@ -1226,10 +1615,19 @@ function esc(s) {
 }
 
 function updateBadge() {
+  // Assign badge
   const count = Object.keys(appData.tasks).length;
   const badge = document.getElementById('assign-badge');
   badge.textContent   = count;
   badge.style.display = count > 0 ? 'flex' : 'none';
+  // Events badge (events in next 30 days)
+  const now  = new Date(); now.setHours(0,0,0,0);
+  const in30 = new Date(now); in30.setDate(in30.getDate() + 30);
+  const evCount = Object.values(appData.events || {})
+    .filter(e => { const d = new Date(e.date); return d >= now && d <= in30; }).length;
+  const evBadge = document.getElementById('events-badge');
+  evBadge.textContent   = evCount;
+  evBadge.style.display = evCount > 0 ? 'flex' : 'none';
 }
 
 function showToast(msg) {
