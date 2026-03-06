@@ -1,0 +1,10 @@
+
+
+  apiKey           : "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
+  authDomain       : "happyfamily-e4f68.firebaseapp.com",
+  projectId        : "happyfamily-e4f68",
+  storageBucket    : "happyfamily-e4f68.firebasestorage.app",
+  messagingSenderId: "740546226739",
+  appId            : "1:740546226739:web:8247b42ed7b059fe5a9146"
+
+var HF_DBURL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
