@@ -829,11 +829,12 @@ var HF_DBURL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebased
 var appData = { tasks: {}, history: {} };
 
 // -- FIREBASE STATE --
-let _db       = null;   // firebase database instance
-let _ref      = null;   // firebase ref function
-let _set      = null;   // firebase set function
-let _remove   = null;   // firebase remove function
-let fbReady   = false;  // true once listener is active
+let _db         = null;   // firebase database instance
+let _ref        = null;   // firebase ref function
+let _set        = null;   // firebase set function
+let _remove     = null;   // firebase remove function
+let fbReady     = false;  // true once listener is active
+let fbSuppressNext = 0;   // suppress onValue echo for N ms after local write
 
 // -- SYNC STATUS UI --
 function setSyncStatus(state) {
@@ -874,6 +875,9 @@ function initFirebase() {
 
     // -- REAL-TIME LISTENER --
     onValue(_ref(_db, 'happyfamily'), (snap) => {
+      // Ignore echo of our own writes for 2 seconds
+      if (fbSuppressNext && Date.now() < fbSuppressNext) return;
+
       const d = snap.val() || {};
       const fbTasks   = d.tasks   || {};
       const fbHistory = d.history || {};
@@ -924,28 +928,30 @@ function initFirebase() {
 
 // -- FIREBASE WRITE HELPERS --
 // Each writes ONLY its own record - never overwrites sibling data
+function _fbSuppress() { fbSuppressNext = Date.now() + 2000; }
+
 function fbSaveTask(id, obj) {
-  if (!fbReady) return;
+  if (!fbReady) return; _fbSuppress();
   _set(_ref(_db, 'happyfamily/tasks/' + id), obj).catch(e => console.error('fbSaveTask:', e));
 }
 function fbDeleteTask(id) {
-  if (!fbReady) return;
+  if (!fbReady) return; _fbSuppress();
   _remove(_ref(_db, 'happyfamily/tasks/' + id)).catch(e => console.error('fbDeleteTask:', e));
 }
 function fbSaveHistory(id, obj) {
-  if (!fbReady) return;
+  if (!fbReady) return; _fbSuppress();
   _set(_ref(_db, 'happyfamily/history/' + id), obj).catch(e => console.error('fbSaveHistory:', e));
 }
 function fbDeleteHistory(id) {
-  if (!fbReady) return;
+  if (!fbReady) return; _fbSuppress();
   _remove(_ref(_db, 'happyfamily/history/' + id)).catch(e => console.error('fbDeleteHistory:', e));
 }
 function fbSaveEvent(id, obj) {
-  if (!fbReady) return;
+  if (!fbReady) return; _fbSuppress();
   _set(_ref(_db, 'happyfamily/events/' + id), obj).catch(e => console.error('fbSaveEvent:', e));
 }
 function fbDeleteEvent(id) {
-  if (!fbReady) return;
+  if (!fbReady) return; _fbSuppress();
   _remove(_ref(_db, 'happyfamily/events/' + id)).catch(e => console.error('fbDeleteEvent:', e));
 }
 
