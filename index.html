@@ -913,8 +913,11 @@ function initFirebase() {
 
     // -- REAL-TIME LISTENER --
     onValue(_ref(_db, 'happyfamily'), (snap) => {
-      // Ignore echo of our own writes for 2 seconds
-      if (fbSuppressNext && Date.now() < fbSuppressNext) return;
+      // If we triggered this update ourselves, skip it
+      if (fbSuppressNext && Date.now() < fbSuppressNext) {
+        console.log('HF: suppressed onValue echo');
+        return;
+      }
 
       const d = snap.val() || {};
       const fbTasks   = d.tasks   || {};
@@ -922,12 +925,10 @@ function initFirebase() {
       const fbEvents  = d.events  || {};
 
       if (!fbReady) {
-        // First connect: if Firebase is empty but we have local data, push local up
         const hasFirebaseData = Object.keys(fbTasks).length > 0 ||
                                 Object.keys(fbHistory).length > 0 ||
                                 Object.keys(fbEvents).length > 0;
         if (!hasFirebaseData) {
-          // Firebase empty — push our local data up so it isn't lost
           const hasLocalData = Object.keys(appData.tasks).length > 0 ||
                                Object.keys(appData.history).length > 0 ||
                                Object.keys(appData.events || {}).length > 0;
@@ -937,7 +938,6 @@ function initFirebase() {
               history: appData.history,
               events : appData.events || {}
             }).catch(()=>{});
-            // Keep local data as-is, don't overwrite with empty Firebase
             fbReady = true;
             setSyncStatus('live');
             return;
@@ -947,7 +947,15 @@ function initFirebase() {
         setSyncStatus('live');
       }
 
-      // Firebase has data — use it as source of truth
+      // Only update if data is actually different from what we have
+      const fbJSON    = JSON.stringify({tasks: fbTasks, history: fbHistory, events: fbEvents});
+      const localJSON = JSON.stringify({tasks: appData.tasks, history: appData.history, events: appData.events||{}});
+      if (fbJSON === localJSON) {
+        console.log('HF: onValue fired but data unchanged, skipping');
+        return;
+      }
+
+      console.log('HF: onValue updating from Firebase');
       appData.tasks   = fbTasks;
       appData.history = fbHistory;
       appData.events  = fbEvents;
@@ -966,7 +974,7 @@ function initFirebase() {
 
 // -- FIREBASE WRITE HELPERS --
 // Each writes ONLY its own record - never overwrites sibling data
-function _fbSuppress() { fbSuppressNext = Date.now() + 2000; }
+function _fbSuppress() { fbSuppressNext = Date.now() + 5000; }
 
 function fbSaveTask(id, obj) {
   if (!fbReady) return; _fbSuppress();
