@@ -848,12 +848,14 @@
 // Get them from: Firebase Console > Project Settings > Your apps
 // ==============================================================
 var HF_CONFIG = {
- apiKey           : "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
+  apiKey           : "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
   authDomain       : "happyfamily-e4f68.firebaseapp.com",
   projectId        : "happyfamily-e4f68",
   storageBucket    : "happyfamily-e4f68.firebasestorage.app",
   messagingSenderId: "740546226739",
   appId            : "1:740546226739:web:8247b42ed7b059fe5a9146"
+
+
 };
 
 // Realtime Database URL (Firebase Console > Realtime Database > Data tab)
@@ -1504,47 +1506,38 @@ function submitEvent() {
 }
 
 function deleteEvent(eventId) {
-  showConfirm('🗑️','Delete this event?','This cannot be undone.','Delete', false, () => {
-    delete appData.events[eventId];
-    saveLocal();
-    fbDeleteEvent(eventId);
-    renderAll();
-    showToast('🗑️ Event deleted');
-  });
+  delete appData.events[eventId];
+  saveLocal();
+  fbDeleteEvent(eventId);
+  renderAll();
+  showToast('🗑️ Event deleted');
 }
 
 // -- DELETE TASK (from Assign) --
 function deleteTask(taskId) {
-  showConfirm('🗑️','Delete this task?','This cannot be undone.','Delete', false, () => {
-    delete appData.tasks[taskId];
-    saveLocal();
-    fbDeleteTask(taskId);
-    renderAll();
-    showToast('🗑️ Task deleted');
-  });
+  delete appData.tasks[taskId];
+  saveLocal();
+  fbDeleteTask(taskId);
+  renderAll();
+  showToast('🗑️ Task deleted');
 }
 
 // -- DELETE HISTORY --
 function deleteHistory(histId) {
-  showConfirm('🗑️','Delete this entry?','This cannot be undone.','Delete', false, () => {
-    delete appData.history[histId];
-    saveLocal();
-    fbDeleteHistory(histId);
-    renderAll();
-    showToast('🗑️ Entry deleted');
-  });
+  delete appData.history[histId];
+  saveLocal();
+  fbDeleteHistory(histId);
+  renderAll();
+  showToast('🗑️ Entry deleted');
 }
 
 // -- REVERT TASK (from History back to Assign) --
 function revertTask(histId) {
-  showConfirm('↩️','Revert to pending?','Task will move back to Assign tab.','Revert', true, () => {
   const task = appData.history[histId];
   if (!task) return;
-  // Reset status fields
   delete task.completedAt;
   delete task.comment;
   task.status = 'pending';
-  // Move to tasks
   const newId = 'task_' + Date.now();
   task.id = newId;
   appData.tasks[newId] = task;
@@ -1554,7 +1547,6 @@ function revertTask(histId) {
   fbDeleteHistory(histId);
   renderAll();
   showToast('↩️ Task moved back to pending!');
-  });
 }
 
 // -- OPEN TASK FROM HOME SCREEN --
