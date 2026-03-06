@@ -848,7 +848,7 @@
 // Get them from: Firebase Console > Project Settings > Your apps
 // ==============================================================
 var HF_CONFIG = {
-  apiKey           : "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
+ apiKey           : "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
   authDomain       : "happyfamily-e4f68.firebaseapp.com",
   projectId        : "happyfamily-e4f68",
   storageBucket    : "happyfamily-e4f68.firebasestorage.app",
@@ -902,66 +902,63 @@ function initFirebase() {
   Promise.all([
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js')
-  ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onValue }]) => {
+  ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onChildAdded, onChildChanged, onChildRemoved, get }]) => {
 
     const fbApp = initializeApp(HF_CONFIG);
-    // Pass the database URL explicitly - required for non-US regional databases
     _db     = getDatabase(fbApp, HF_DBURL);
     _ref    = ref;
     _set    = set;
     _remove = remove;
 
-    // -- REAL-TIME LISTENER --
-    onValue(_ref(_db, 'happyfamily'), (snap) => {
-      // If we triggered this update ourselves, skip it
-      if (fbSuppressNext && Date.now() < fbSuppressNext) {
-        console.log('HF: suppressed onValue echo');
-        return;
-      }
-
+    // -- FIRST LOAD: read everything once --
+    get(_ref(_db, 'happyfamily')).then(snap => {
       const d = snap.val() || {};
       const fbTasks   = d.tasks   || {};
       const fbHistory = d.history || {};
       const fbEvents  = d.events  || {};
 
-      if (!fbReady) {
-        const hasFirebaseData = Object.keys(fbTasks).length > 0 ||
-                                Object.keys(fbHistory).length > 0 ||
-                                Object.keys(fbEvents).length > 0;
-        if (!hasFirebaseData) {
-          const hasLocalData = Object.keys(appData.tasks).length > 0 ||
-                               Object.keys(appData.history).length > 0 ||
-                               Object.keys(appData.events || {}).length > 0;
-          if (hasLocalData) {
-            _set(_ref(_db, 'happyfamily'), {
-              tasks  : appData.tasks,
-              history: appData.history,
-              events : appData.events || {}
-            }).catch(()=>{});
-            fbReady = true;
-            setSyncStatus('live');
-            return;
-          }
+      const hasFirebaseData = Object.keys(fbTasks).length > 0 ||
+                              Object.keys(fbHistory).length > 0 ||
+                              Object.keys(fbEvents).length > 0;
+
+      if (!hasFirebaseData) {
+        // Firebase empty - push local data up
+        const hasLocal = Object.keys(appData.tasks).length > 0 ||
+                         Object.keys(appData.history).length > 0 ||
+                         Object.keys(appData.events || {}).length > 0;
+        if (hasLocal) {
+          _set(_ref(_db, 'happyfamily'), {
+            tasks  : appData.tasks,
+            history: appData.history,
+            events : appData.events || {}
+          }).catch(()=>{});
         }
-        fbReady = true;
-        setSyncStatus('live');
+      } else {
+        appData.tasks   = fbTasks;
+        appData.history = fbHistory;
+        appData.events  = fbEvents;
+        saveLocal();
+        renderAll();
       }
 
-      // Only update if data is actually different from what we have
-      const fbJSON    = JSON.stringify({tasks: fbTasks, history: fbHistory, events: fbEvents});
-      const localJSON = JSON.stringify({tasks: appData.tasks, history: appData.history, events: appData.events||{}});
-      if (fbJSON === localJSON) {
-        console.log('HF: onValue fired but data unchanged, skipping');
-        return;
-      }
+      fbReady = true;
+      setSyncStatus('live');
 
-      console.log('HF: onValue updating from Firebase');
-      appData.tasks   = fbTasks;
-      appData.history = fbHistory;
-      appData.events  = fbEvents;
-      saveLocal();
-      renderAll();
-    }, (err) => {
+      // -- INCREMENTAL LISTENERS: only fire for changes from OTHER devices --
+      // Tasks
+      onChildAdded  (_ref(_db,'happyfamily/tasks'),   s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { appData.tasks[s.key]   = s.val(); renderAll(); }});
+      onChildChanged(_ref(_db,'happyfamily/tasks'),   s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { appData.tasks[s.key]   = s.val(); renderAll(); }});
+      onChildRemoved(_ref(_db,'happyfamily/tasks'),   s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { delete appData.tasks[s.key];   saveLocal(); renderAll(); }});
+      // History
+      onChildAdded  (_ref(_db,'happyfamily/history'), s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { appData.history[s.key] = s.val(); renderAll(); }});
+      onChildChanged(_ref(_db,'happyfamily/history'), s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { appData.history[s.key] = s.val(); renderAll(); }});
+      onChildRemoved(_ref(_db,'happyfamily/history'), s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { delete appData.history[s.key]; saveLocal(); renderAll(); }});
+      // Events
+      onChildAdded  (_ref(_db,'happyfamily/events'),  s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { if(!appData.events)appData.events={}; appData.events[s.key]  = s.val(); renderAll(); }});
+      onChildChanged(_ref(_db,'happyfamily/events'),  s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { if(!appData.events)appData.events={}; appData.events[s.key]  = s.val(); renderAll(); }});
+      onChildRemoved(_ref(_db,'happyfamily/events'),  s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { delete appData.events[s.key];  saveLocal(); renderAll(); }});
+
+    }).catch(err => {
       console.error('Firebase read error:', err);
       setSyncStatus('error');
     });
