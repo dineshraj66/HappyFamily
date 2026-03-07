@@ -2,7 +2,7 @@
   "name": "HappyFamily",
   "short_name": "HappyFamily",
   "description": "Family task & shopping manager for Dinesh & Sushmi",
-  "start_url": "./app.html",
+  "start_url": "./hf2025.html",
   "display": "standalone",
   "background_color": "#FF6B6B",
   "theme_color": "#FF6B6B",
