@@ -856,6 +856,7 @@
 
 // -- SINGLE SOURCE OF TRUTH --
 var appData = { tasks: {}, history: {} };
+var deletedKeys = {};  // keys deleted locally, never restored by Firebase
 
 // -- FIREBASE STATE --
 let _db         = null;   // firebase database instance
@@ -893,7 +894,7 @@ function initFirebase() {
   Promise.all([
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js')
-  ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onChildChanged, onChildRemoved, get }]) => {
+  ]).then(([{ initializeApp }, { getDatabase, ref, set, remove, onChildAdded, onChildChanged, onChildRemoved, get }]) => {
 
     const fbApp = initializeApp(HF_CONFIG);
     _db     = getDatabase(fbApp, HF_DBURL);
@@ -938,27 +939,21 @@ function initFirebase() {
       // -- INCREMENTAL LISTENERS for changes from other devices --
       // Skip onChildAdded entirely - we already have full data from get()
       // Only listen for changed and removed
-      function notSuppressed() { return Date.now() > fbSuppressNext; }
+      function fromOtherDevice() { return Date.now() > fbSuppressNext; }
 
-      onChildChanged(_ref(_db,'happyfamily/tasks'),   s => { if (notSuppressed()) { appData.tasks[s.key]   = s.val(); saveLocal(); renderAll(); }});
-      onChildRemoved(_ref(_db,'happyfamily/tasks'),   s => { if (notSuppressed()) { delete appData.tasks[s.key];   saveLocal(); renderAll(); }});
-      onChildChanged(_ref(_db,'happyfamily/history'), s => { if (notSuppressed()) { appData.history[s.key] = s.val(); saveLocal(); renderAll(); }});
-      onChildRemoved(_ref(_db,'happyfamily/history'), s => { if (notSuppressed()) { delete appData.history[s.key]; saveLocal(); renderAll(); }});
-      onChildChanged(_ref(_db,'happyfamily/events'),  s => { if (notSuppressed()) { if(!appData.events)appData.events={}; appData.events[s.key] = s.val(); saveLocal(); renderAll(); }});
-      onChildRemoved(_ref(_db,'happyfamily/events'),  s => { if (notSuppressed()) { delete (appData.events||{})[s.key]; saveLocal(); renderAll(); }});
-      // Poll every 60s for new items from other device — but MERGE not replace
-      setInterval(() => {
-        if (notSuppressed()) {
-          get(_ref(_db, 'happyfamily')).then(snap => {
-            const d = snap.val() || {};
-            // Only ADD new keys — never remove keys that we deleted locally
-            Object.assign(appData.tasks,   d.tasks   || {});
-            Object.assign(appData.history, d.history || {});
-            Object.assign(appData.events,  d.events  || {});
-            saveLocal(); renderAll();
-          }).catch(()=>{});
-        }
-      }, 60000);
+      // onChildAdded: only add if key not already in appData (avoids re-adding deleted items)
+      onChildAdded  (_ref(_db,'happyfamily/tasks'),   s => { if (fromOtherDevice() && !deletedKeys[s.key] && !appData.tasks[s.key])   { appData.tasks[s.key]   = s.val(); saveLocal(); renderAll(); }});
+      onChildChanged(_ref(_db,'happyfamily/tasks'),   s => { if (fromOtherDevice() && !deletedKeys[s.key])     { appData.tasks[s.key]   = s.val(); saveLocal(); renderAll(); }});
+      onChildRemoved(_ref(_db,'happyfamily/tasks'),   s => { if (fromOtherDevice())                             { delete appData.tasks[s.key];   saveLocal(); renderAll(); }});
+
+      onChildAdded  (_ref(_db,'happyfamily/history'), s => { if (fromOtherDevice() && !deletedKeys[s.key] && !appData.history[s.key]) { appData.history[s.key] = s.val(); saveLocal(); renderAll(); }});
+      onChildChanged(_ref(_db,'happyfamily/history'), s => { if (fromOtherDevice() && !deletedKeys[s.key])     { appData.history[s.key] = s.val(); saveLocal(); renderAll(); }});
+      onChildRemoved(_ref(_db,'happyfamily/history'), s => { if (fromOtherDevice())                             { delete appData.history[s.key]; saveLocal(); renderAll(); }});
+
+      onChildAdded  (_ref(_db,'happyfamily/events'),  s => { if (fromOtherDevice() && !deletedKeys[s.key] && !(appData.events||{})[s.key]) { if(!appData.events)appData.events={}; appData.events[s.key] = s.val(); saveLocal(); renderAll(); }});
+      onChildChanged(_ref(_db,'happyfamily/events'),  s => { if (fromOtherDevice() && !deletedKeys[s.key])     { if(!appData.events)appData.events={}; appData.events[s.key] = s.val(); saveLocal(); renderAll(); }});
+      onChildRemoved(_ref(_db,'happyfamily/events'),  s => { if (fromOtherDevice())                             { delete (appData.events||{})[s.key]; saveLocal(); renderAll(); }});
+      // Real-time sync handled by onChildChanged/onChildRemoved listeners above
 
     }).catch(err => {
       console.error('Firebase read error:', err);
@@ -1513,6 +1508,7 @@ function submitEvent() {
 }
 
 function deleteEvent(eventId) {
+  deletedKeys[eventId] = true;
   delete appData.events[eventId];
   saveLocal();
   fbDeleteEvent(eventId);
@@ -1522,6 +1518,7 @@ function deleteEvent(eventId) {
 
 // -- DELETE TASK (from Assign) --
 function deleteTask(taskId) {
+  deletedKeys[taskId] = true;
   delete appData.tasks[taskId];
   saveLocal();
   fbDeleteTask(taskId);
@@ -1531,6 +1528,7 @@ function deleteTask(taskId) {
 
 // -- DELETE HISTORY --
 function deleteHistory(histId) {
+  deletedKeys[histId] = true;
   delete appData.history[histId];
   saveLocal();
   fbDeleteHistory(histId);
@@ -1542,6 +1540,7 @@ function deleteHistory(histId) {
 function revertTask(histId) {
   const task = appData.history[histId];
   if (!task) return;
+  deletedKeys[histId] = true;
   delete task.completedAt;
   delete task.comment;
   task.status = 'pending';
