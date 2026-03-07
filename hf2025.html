@@ -1531,18 +1531,25 @@ function deleteTask(taskId) {
 
 // -- DELETE HISTORY --
 function deleteHistory(histId) {
+  console.log('deleteHistory called', histId);
+  console.log('exists:', histId in appData.history);
+  console.log('history keys:', Object.keys(appData.history));
   deletedKeys[histId] = true;
   delete appData.history[histId];
+  console.log('after delete, history length:', Object.keys(appData.history).length);
   saveLocal();
   fbDeleteHistory(histId);
   renderAll();
-  showToast('🗑️ Entry deleted');
+  console.log('after renderAll, history length:', Object.keys(appData.history).length);
+  showToast('🗑️ DEL histId=' + histId.slice(-6) + ' existed=' + (histId in appData.history === false));
 }
 
 // -- REVERT TASK (from History back to Assign) --
 function revertTask(histId) {
+  console.log('revertTask called', histId);
+  console.log('exists:', histId in appData.history, 'keys:', Object.keys(appData.history));
   const task = appData.history[histId];
-  if (!task) return;
+  if (!task) { console.log('TASK NOT FOUND'); return; }
   deletedKeys[histId] = true;
   delete task.completedAt;
   delete task.comment;
