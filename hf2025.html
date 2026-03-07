@@ -862,12 +862,12 @@ var HF_CONFIG = {
   storageBucket    : "happyfamily-e4f68.firebasestorage.app",
   messagingSenderId: "740546226739",
   appId            : "1:740546226739:web:8247b42ed7b059fe5a9146"
-
+ 
 };
 
 // Realtime Database URL (Firebase Console > Realtime Database > Data tab)
 // Your project: https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
-var HF_DBURL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
+ var HF_DBURL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
 // ==============================================================
 
 // -- SINGLE SOURCE OF TRUTH --
@@ -1880,6 +1880,40 @@ if ('serviceWorker' in navigator) {
     if (reg.waiting) reg.waiting.postMessage('skipWaiting');
   });
 }
+
+// Expose functions to global scope for HTML onclick attributes
+window.showPage            = showPage;
+window.onFabClick          = onFabClick;
+window.openModal           = openModal;
+window.closeModal          = closeModal;
+window.closeModalOutside   = closeModalOutside;
+window.setGlobalAssign     = setGlobalAssign;
+window.addItemRow          = addItemRow;
+window.removeRow           = removeRow;
+window.submitTasks         = submitTasks;
+window.setFilter           = setFilter;
+window.completeTask        = completeTask;
+window.deleteTask          = deleteTask;
+window.deleteHistory       = deleteHistory;
+window.revertTask          = revertTask;
+window.openTaskFromHome    = openTaskFromHome;
+window.openEditModal       = openEditModal;
+window.closeEditModal      = closeEditModal;
+window.closeEditModalOutside = closeEditModalOutside;
+window.setEditGlobalAssign = setEditGlobalAssign;
+window.addEditItemRow      = addEditItemRow;
+window.removeEditRow       = removeEditRow;
+window.submitEditTask      = submitEditTask;
+window.openEventModal      = openEventModal;
+window.openEditEventModal  = openEditEventModal;
+window.closeEventModal     = closeEventModal;
+window.closeEventModalOutside = closeEventModalOutside;
+window.submitEvent         = submitEvent;
+window.deleteEvent         = deleteEvent;
+window.closeConfirm        = closeConfirm;
+window.runConfirm          = runConfirm;
+window.dismissIOSBanner    = dismissIOSBanner;
+
 })(); // end IIFE
 </script>
 </body>
