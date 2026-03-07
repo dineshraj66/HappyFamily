@@ -3,22 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 </head>
 <body>
 <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(function(regs) {
-    return Promise.all(regs.map(function(r) { return r.unregister(); }));
+  navigator.serviceWorker.getRegistrations().then(function(r) {
+    return Promise.all(r.map(function(x){return x.unregister();}));
   }).then(function() {
-    return caches.keys().then(function(keys) {
-      return Promise.all(keys.map(function(k) { return caches.delete(k); }));
-    });
-  }).finally(function() { window.location.replace('hf2025.html'); });
-} else {
-  window.location.replace('hf2025.html');
-}
+    return caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c);}));});
+  }).finally(function(){ window.location.replace('hf2025.html'); });
+} else { window.location.replace('hf2025.html'); }
 </script>
 </body>
 </html>
