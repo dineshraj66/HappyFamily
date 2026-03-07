@@ -843,6 +843,9 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 <script>
+// Wrap everything in IIFE to isolate from any cached scripts
+(function() {
+'use strict';
 // ========================================================
 //  HAPPYFAMILY - SINGLE SCRIPT, REAL-TIME FIREBASE SYNC
 // ========================================================
@@ -858,6 +861,7 @@ const FIREBASE_PROJECT_ID     = "happyfamily-e4f68";
 const FIREBASE_STORAGE_BUCKET = "happyfamily-e4f68.firebasestorage.app";
 const FIREBASE_MESSAGING_ID   = "740546226739";
 const FIREBASE_APP_ID         = "1:740546226739:web:8247b42ed7b059fe5a9146";
+
 };
 
 // Realtime Database URL (Firebase Console > Realtime Database > Data tab)
@@ -1875,6 +1879,7 @@ if ('serviceWorker' in navigator) {
     if (reg.waiting) reg.waiting.postMessage('skipWaiting');
   });
 }
+})(); // end IIFE
 </script>
 </body>
 </html>
