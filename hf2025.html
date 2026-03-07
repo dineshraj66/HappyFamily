@@ -1334,8 +1334,7 @@ function renderAssign() {
 
 // -- HISTORY --
 function renderHistory() {
-  const hist = Object.values(appData.history)
-    .sort((a,b) => new Date(b.completedAt) - new Date(a.completedAt));
+  const hist = Object.values(appData.history);
   const list = document.getElementById('history-list');
 
   if (hist.length === 0) {
@@ -1347,10 +1346,13 @@ function renderHistory() {
   }
 
   const groups = {};
-  hist.forEach(h => {
-    const key = new Date(h.completedAt).toLocaleDateString('en-US',{year:'numeric',month:'long'});
-    (groups[key] = groups[key] || []).push(h);
-  });
+  // Use entries so we have both the hist_ key and the object
+  Object.entries(appData.history)
+    .sort((a,b) => new Date(b[1].completedAt) - new Date(a[1].completedAt))
+    .forEach(([hKey, h]) => {
+      const key = new Date(h.completedAt).toLocaleDateString('en-US',{year:'numeric',month:'long'});
+      (groups[key] = groups[key] || []).push({...h, _hKey: hKey});
+    });
 
   list.innerHTML = Object.entries(groups).map(([month, items]) => `
     <div class="history-month-group">
@@ -1359,6 +1361,7 @@ function renderHistory() {
       </div>
       ${items.map(t => {
         const persons = [...new Set(t.items.map(i=>i.assignTo))];
+        const hKey = t._hKey;
         return `<div class="history-card">
           <div class="history-card-header">
             <div class="history-card-title">${esc(t.title||'Task list')}</div>
@@ -1377,8 +1380,8 @@ function renderHistory() {
           </div>
           ${t.comment ? `<div class="history-comment">💬 "${esc(t.comment)}"</div>` : ''}
           <div style="display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-            <button class="btn-revert" onclick="revertTask('${t.id}')">↩️ Revert</button>
-            <button class="btn-delete" onclick="deleteHistory('${t.id}')">🗑️ Delete</button>
+            <button class="btn-revert" onclick="revertTask('${hKey}')">↩️ Revert</button>
+            <button class="btn-delete" onclick="deleteHistory('${hKey}')">🗑️ Delete</button>
           </div>
         </div>`;
       }).join('')}
@@ -1518,38 +1521,29 @@ function deleteEvent(eventId) {
 
 // -- DELETE TASK (from Assign) --
 function deleteTask(taskId) {
-  var existed = taskId in appData.tasks;
-  var before  = Object.keys(appData.tasks).length;
   deletedKeys[taskId] = true;
   delete appData.tasks[taskId];
   saveLocal();
   fbDeleteTask(taskId);
   renderAll();
   var after = Object.keys(appData.tasks).length;
-  showToast('🗑️ DEL: existed=' + existed + ' before=' + before + ' after=' + after);
+  showToast('🗑️ Task deleted');
 }
 
 // -- DELETE HISTORY --
 function deleteHistory(histId) {
-  console.log('deleteHistory called', histId);
-  console.log('exists:', histId in appData.history);
-  console.log('history keys:', Object.keys(appData.history));
   deletedKeys[histId] = true;
   delete appData.history[histId];
-  console.log('after delete, history length:', Object.keys(appData.history).length);
   saveLocal();
   fbDeleteHistory(histId);
   renderAll();
-  console.log('after renderAll, history length:', Object.keys(appData.history).length);
-  showToast('🗑️ DEL histId=' + histId.slice(-6) + ' existed=' + (histId in appData.history === false));
+  showToast('🗑️ Entry deleted');
 }
 
 // -- REVERT TASK (from History back to Assign) --
 function revertTask(histId) {
-  console.log('revertTask called', histId);
-  console.log('exists:', histId in appData.history, 'keys:', Object.keys(appData.history));
   const task = appData.history[histId];
-  if (!task) { console.log('TASK NOT FOUND'); return; }
+  if (!task) return;
   deletedKeys[histId] = true;
   delete task.completedAt;
   delete task.comment;
