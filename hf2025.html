@@ -527,6 +527,8 @@
   .ios-step-text { font-size: 13px; font-weight: 600; color: var(--text); }
   .ios-step-text span { color: var(--coral); font-weight: 800; }
 </style>
+<!-- Firebase config — edit config.js only, never touch this file -->
+<script src="config.js"></script>
 </head>
 <body>
 
@@ -850,25 +852,7 @@
 //  HAPPYFAMILY - SINGLE SCRIPT, REAL-TIME FIREBASE SYNC
 // ========================================================
 
-// ==============================================================
-// PASTE YOUR FIREBASE VALUES DIRECTLY BELOW
-// Get them from: Firebase Console > Project Settings > Your apps
-// ==============================================================
-var HF_CONFIG = {
-  
-  apiKey           : "AIzaSyAYMam4tBdUxASImlaYiHMw0RiBHUWtaWk",
-  authDomain       : "happyfamily-e4f68.firebaseapp.com",
-  projectId        : "happyfamily-e4f68",
-  storageBucket    : "happyfamily-e4f68.firebasestorage.app",
-  messagingSenderId: "740546226739",
-  appId            : "1:740546226739:web:8247b42ed7b059fe5a9146"
- 
-};
-
-// Realtime Database URL (Firebase Console > Realtime Database > Data tab)
-// Your project: https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app
- var HF_DBURL = "https://happyfamily-e4f68-default-rtdb.asia-southeast1.firebasedatabase.app";
-// ==============================================================
+// Config loaded from config.js (HF_CONFIG and HF_DBURL)
 
 // -- SINGLE SOURCE OF TRUTH --
 var appData = { tasks: {}, history: {} };
@@ -954,24 +938,27 @@ function initFirebase() {
       // -- INCREMENTAL LISTENERS for changes from other devices --
       // Skip onChildAdded entirely - we already have full data from get()
       // Only listen for changed and removed
-      onChildChanged(_ref(_db,'happyfamily/tasks'),   s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { appData.tasks[s.key]   = s.val(); saveLocal(); renderAll(); }});
-      onChildRemoved(_ref(_db,'happyfamily/tasks'),   s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { delete appData.tasks[s.key];   saveLocal(); renderAll(); }});
-      onChildChanged(_ref(_db,'happyfamily/history'), s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { appData.history[s.key] = s.val(); saveLocal(); renderAll(); }});
-      onChildRemoved(_ref(_db,'happyfamily/history'), s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { delete appData.history[s.key]; saveLocal(); renderAll(); }});
-      onChildChanged(_ref(_db,'happyfamily/events'),  s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { if(!appData.events)appData.events={}; appData.events[s.key] = s.val(); saveLocal(); renderAll(); }});
-      onChildRemoved(_ref(_db,'happyfamily/events'),  s => { if (!fbSuppressNext || Date.now()>fbSuppressNext) { delete (appData.events||{})[s.key]; saveLocal(); renderAll(); }});
-      // For new items added on other device, poll every 30s as fallback
+      function notSuppressed() { return Date.now() > fbSuppressNext; }
+
+      onChildChanged(_ref(_db,'happyfamily/tasks'),   s => { if (notSuppressed()) { appData.tasks[s.key]   = s.val(); saveLocal(); renderAll(); }});
+      onChildRemoved(_ref(_db,'happyfamily/tasks'),   s => { if (notSuppressed()) { delete appData.tasks[s.key];   saveLocal(); renderAll(); }});
+      onChildChanged(_ref(_db,'happyfamily/history'), s => { if (notSuppressed()) { appData.history[s.key] = s.val(); saveLocal(); renderAll(); }});
+      onChildRemoved(_ref(_db,'happyfamily/history'), s => { if (notSuppressed()) { delete appData.history[s.key]; saveLocal(); renderAll(); }});
+      onChildChanged(_ref(_db,'happyfamily/events'),  s => { if (notSuppressed()) { if(!appData.events)appData.events={}; appData.events[s.key] = s.val(); saveLocal(); renderAll(); }});
+      onChildRemoved(_ref(_db,'happyfamily/events'),  s => { if (notSuppressed()) { delete (appData.events||{})[s.key]; saveLocal(); renderAll(); }});
+      // Poll every 60s for new items from other device — but MERGE not replace
       setInterval(() => {
-        if (!fbSuppressNext || Date.now() > fbSuppressNext) {
+        if (notSuppressed()) {
           get(_ref(_db, 'happyfamily')).then(snap => {
             const d = snap.val() || {};
-            appData.tasks   = d.tasks   || {};
-            appData.history = d.history || {};
-            appData.events  = d.events  || {};
+            // Only ADD new keys — never remove keys that we deleted locally
+            Object.assign(appData.tasks,   d.tasks   || {});
+            Object.assign(appData.history, d.history || {});
+            Object.assign(appData.events,  d.events  || {});
             saveLocal(); renderAll();
           }).catch(()=>{});
         }
-      }, 30000);
+      }, 60000);
 
     }).catch(err => {
       console.error('Firebase read error:', err);
@@ -986,7 +973,7 @@ function initFirebase() {
 
 // -- FIREBASE WRITE HELPERS --
 // Each writes ONLY its own record - never overwrites sibling data
-function _fbSuppress() { fbSuppressNext = Date.now() + 5000; }
+function _fbSuppress() { fbSuppressNext = Date.now() + 10000; }
 
 function fbSaveTask(id, obj) {
   if (!fbReady) return; _fbSuppress();
@@ -1535,14 +1522,10 @@ function deleteEvent(eventId) {
 
 // -- DELETE TASK (from Assign) --
 function deleteTask(taskId) {
-  console.log('DELETE TASK START:', taskId, 'tasks before:', Object.keys(appData.tasks).length);
   delete appData.tasks[taskId];
-  console.log('DELETE TASK after delete:', Object.keys(appData.tasks).length);
   saveLocal();
-  console.log('DELETE TASK after saveLocal, reading back:', Object.keys(JSON.parse(localStorage.getItem('hf_data')||'{}').tasks||{}).length);
   fbDeleteTask(taskId);
   renderAll();
-  console.log('DELETE TASK after renderAll, appData.tasks count:', Object.keys(appData.tasks).length);
   showToast('🗑️ Task deleted');
 }
 
