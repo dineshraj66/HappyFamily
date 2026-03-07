@@ -1518,14 +1518,15 @@ function deleteEvent(eventId) {
 
 // -- DELETE TASK (from Assign) --
 function deleteTask(taskId) {
-  alert('deleteTask called: ' + taskId + '\nExists in appData: ' + (taskId in appData.tasks) + '\nTotal tasks: ' + Object.keys(appData.tasks).length);
+  var existed = taskId in appData.tasks;
+  var before  = Object.keys(appData.tasks).length;
   deletedKeys[taskId] = true;
   delete appData.tasks[taskId];
   saveLocal();
   fbDeleteTask(taskId);
   renderAll();
-  alert('After delete: ' + Object.keys(appData.tasks).length + ' tasks remain');
-  showToast('🗑️ Task deleted');
+  var after = Object.keys(appData.tasks).length;
+  showToast('🗑️ DEL: existed=' + existed + ' before=' + before + ' after=' + after);
 }
 
 // -- DELETE HISTORY --
